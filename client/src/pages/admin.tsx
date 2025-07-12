@@ -96,7 +96,7 @@ export function Admin() {
           <Button
             onClick={() => window.location.href = "/"}
             variant="outline"
-            className="border-gray-600 text-gray-300 hover:border-gray-500"
+            className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black"
           >
             <Home className="h-4 w-4 mr-2" />
             Back to Home
@@ -147,8 +147,8 @@ export function Admin() {
                               variant={user.plan.status === "active" ? "default" : "secondary"}
                               className={
                                 user.plan.status === "active"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-yellow-100 text-yellow-800"
+                                  ? "bg-green-600 text-white"
+                                  : "bg-yellow-500 text-black"
                               }
                             >
                               {user.plan.status}

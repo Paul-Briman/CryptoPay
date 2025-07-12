@@ -104,7 +104,7 @@ export function Dashboard() {
           <Button
             onClick={() => window.location.href = "/"}
             variant="outline"
-            className="border-gray-600 text-gray-300 hover:border-gray-500 hover:crypto-text-gold transition-colors"
+            className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black transition-colors"
           >
             <Home className="h-4 w-4 mr-2" />
             Back to Home
@@ -266,7 +266,7 @@ export function Dashboard() {
                                 <span className="font-semibold text-white">{plan.duration} days</span>
                               </div>
                             </div>
-                            <Button className="w-full mt-4 crypto-bg-gold text-black hover:bg-yellow-400 font-semibold">
+                            <Button className="w-full mt-4 bg-yellow-500 text-black hover:bg-yellow-400 font-semibold">
                               Select This Plan
                             </Button>
                           </CardContent>

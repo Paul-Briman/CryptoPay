@@ -2,7 +2,7 @@
 
 ## Overview
 
-CryptoPay is a modern Bitcoin investment platform built with React and Node.js. The application allows users to register, log in, select investment plans, and manage their Bitcoin investments. It features a clean black and yellow theme with responsive design, user authentication, plan management, and admin functionality.
+CryptoPay is a modern Bitcoin investment platform built with React and Node.js. The application allows users to register, log in, select investment plans, and manage their Bitcoin investments. It features a consistent professional black and yellow theme with responsive design, user authentication, plan management, and admin functionality with dedicated admin login page.
 
 ## User Preferences
 

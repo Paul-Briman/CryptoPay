@@ -58,15 +58,19 @@ export function Navbar({ onLoginClick, onSignupClick }: NavbarProps) {
             {user ? (
               <>
                 <Link href="/dashboard">
-                  <Button variant="secondary" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black"
+                  >
                     Dashboard
                   </Button>
                 </Link>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="crypto-hover-gold"
+                  className="border-gray-500 text-gray-300 hover:bg-gray-500 hover:text-black"
                 >
                   Logout
                 </Button>
@@ -74,17 +78,17 @@ export function Navbar({ onLoginClick, onSignupClick }: NavbarProps) {
             ) : (
               <>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={onLoginClick}
-                  className="crypto-hover-gold"
+                  className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black"
                 >
                   Login
                 </Button>
                 <Button
                   size="sm"
                   onClick={onSignupClick}
-                  className="crypto-bg-gold text-black hover:bg-yellow-400"
+                  className="bg-yellow-500 text-black hover:bg-yellow-400 font-semibold"
                 >
                   Sign Up
                 </Button>
