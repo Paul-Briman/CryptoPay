@@ -1,4 +1,5 @@
 import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -21,6 +22,17 @@ export const userPlans = pgTable("user_plans", {
   status: text("status").notNull().default("pending"), // 'pending', 'active', 'completed'
   createdAt: timestamp("created_at").defaultNow()
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+  userPlans: many(userPlans),
+}));
+
+export const userPlansRelations = relations(userPlans, ({ one }) => ({
+  user: one(users, {
+    fields: [userPlans.userId],
+    references: [users.id],
+  }),
+}));
 
 export const insertUserSchema = createInsertSchema(users).pick({
   name: true,

@@ -29,9 +29,10 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage
 - **Database**: PostgreSQL (configured for Neon Database)
-- **ORM**: Drizzle ORM with type-safe queries
+- **ORM**: Drizzle ORM with type-safe queries and relations
 - **Session Store**: In-memory session storage (MemoryStore)
 - **Schema**: Shared TypeScript schemas between frontend and backend
+- **Storage**: DatabaseStorage class implementing IStorage interface
 
 ## Key Components
 

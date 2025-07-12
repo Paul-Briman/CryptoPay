@@ -1,4 +1,6 @@
 import { users, userPlans, type User, type InsertUser, type UserPlan, type InsertUserPlan } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -101,4 +103,62 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async getUserByName(name: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.name, name));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+
+  async getUserPlan(userId: number): Promise<UserPlan | undefined> {
+    const [userPlan] = await db
+      .select()
+      .from(userPlans)
+      .where(eq(userPlans.userId, userId));
+    return userPlan || undefined;
+  }
+
+  async createUserPlan(insertUserPlan: InsertUserPlan): Promise<UserPlan> {
+    const [userPlan] = await db
+      .insert(userPlans)
+      .values(insertUserPlan)
+      .returning();
+    return userPlan;
+  }
+
+  async updateUserPlanStatus(id: number, status: string): Promise<UserPlan | undefined> {
+    const [updatedPlan] = await db
+      .update(userPlans)
+      .set({ status })
+      .where(eq(userPlans.id, id))
+      .returning();
+    return updatedPlan || undefined;
+  }
+
+  async getAllUserPlans(): Promise<UserPlan[]> {
+    return await db.select().from(userPlans);
+  }
+}
+
+export const storage = new DatabaseStorage();
