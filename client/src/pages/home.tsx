@@ -94,30 +94,32 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+      <section className="relative min-h-screen flex items-center justify-center crypto-bg-black">
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black"></div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
             Grow Your Wealth with{" "}
             <span className="crypto-text-gold">Bitcoin</span>
           </h1>
-          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto">
+          <p className="text-lg md:text-xl lg:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
             Bitcoin is secure, limited in supply, borderless, and has made thousands of
             millionaires. Join the digital revolution and multiply your investment with our proven
             strategies.
           </p>
 
           {/* Live Bitcoin Price */}
-          <Card className="crypto-bg-gray border-gray-600 mb-8 max-w-md mx-auto">
+          <Card className="crypto-bg-gray border-gray-600 mb-8 max-w-md mx-auto shadow-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-center mb-2">
                 <Bitcoin className="crypto-text-gold h-8 w-8 mr-2" />
-                <span className="text-gray-300">Live Bitcoin Price</span>
+                <span className="text-gray-300 font-medium">Live Bitcoin Price</span>
               </div>
-              <div className="text-3xl font-bold crypto-text-gold mb-1">
+              <div className="text-3xl md:text-4xl font-bold crypto-text-gold mb-1">
                 ${bitcoinPrice?.price?.toLocaleString() || "117,672.00"}
               </div>
-              <div className={`text-sm ${bitcoinPrice?.change && bitcoinPrice.change > 0 ? 'crypto-text-success' : 'crypto-text-error'}`}>
-                📈 {bitcoinPrice?.change ? `${bitcoinPrice.change > 0 ? '+' : ''}${bitcoinPrice.change.toFixed(2)}%` : '+0.96%'} (24h)
+              <div className={`text-sm flex items-center justify-center ${bitcoinPrice?.change && bitcoinPrice.change > 0 ? 'crypto-text-success' : 'crypto-text-error'}`}>
+                <ChartBar className="w-4 h-4 mr-1" />
+                {bitcoinPrice?.change ? `${bitcoinPrice.change > 0 ? '+' : ''}${bitcoinPrice.change.toFixed(2)}%` : '+0.96%'} (24h)
               </div>
             </CardContent>
           </Card>
@@ -126,14 +128,14 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
             <Button
               onClick={handleStartInvesting}
               size="lg"
-              className="crypto-bg-gold text-black hover:bg-yellow-400 px-8 py-6 text-lg font-semibold"
+              className="crypto-bg-gold text-black hover:bg-yellow-400 px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-200 transform hover:scale-105"
             >
               Start Investing Now
             </Button>
             <Button
               variant="outline"
               size="lg"
-              className="border-2 crypto-border-gold crypto-text-gold hover:crypto-bg-gold hover:text-black px-8 py-6 text-lg font-semibold"
+              className="border-2 crypto-border-gold crypto-text-gold hover:crypto-bg-gold hover:text-black px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-200"
             >
               Learn More
             </Button>
@@ -145,23 +147,23 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
       <section id="plans" className="py-16 crypto-bg-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Investment Plans</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Investment Plans</h2>
             <p className="text-xl text-gray-300">Choose the plan that fits your investment goals</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {plans.map((plan) => {
               const Icon = plan.icon;
               return (
                 <Card
                   key={plan.id}
-                  className={`crypto-bg-gray border-gray-600 hover:crypto-border-gold transition-colors duration-200 relative ${
-                    plan.popular ? "border-2 crypto-border-gold" : ""
+                  className={`crypto-bg-gray border-gray-600 hover:crypto-border-gold transition-all duration-300 relative hover:shadow-2xl hover:transform hover:scale-105 ${
+                    plan.popular ? "border-2 crypto-border-gold shadow-lg" : ""
                   }`}
                 >
                   {plan.popular && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge className="crypto-bg-gold text-black px-3 py-1 text-sm font-semibold">
+                      <Badge className="crypto-bg-gold text-black px-3 py-1 text-sm font-semibold rounded-full">
                         POPULAR
                       </Badge>
                     </div>
@@ -175,7 +177,7 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
                       <div className="text-3xl font-bold crypto-text-gold mb-2">
                         ${plan.investment.toLocaleString()}
                       </div>
-                      <div className="text-gray-300">Minimum Investment</div>
+                      <div className="text-gray-300 text-sm">Minimum Investment</div>
                     </div>
                     <div className="crypto-bg-black rounded-lg p-4 mb-6">
                       <div className="text-center">
@@ -183,13 +185,13 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
                         <div className="text-2xl font-bold crypto-text-success">
                           ${plan.returns.toLocaleString()}
                         </div>
-                        <div className="crypto-text-gold text-sm">{plan.roi}% ROI</div>
+                        <div className="crypto-text-gold text-sm font-semibold">{plan.roi}% ROI</div>
                         <div className="text-gray-400 text-xs">{plan.multiplier} multiplier</div>
                       </div>
                     </div>
                     <Button
                       onClick={() => user ? window.location.href = "/dashboard" : onSignupClick()}
-                      className="w-full crypto-bg-gold text-black hover:bg-yellow-400 font-semibold py-3"
+                      className="w-full crypto-bg-gold text-black hover:bg-yellow-400 font-semibold py-3 rounded-lg transition-all duration-200"
                     >
                       Select Plan
                     </Button>
@@ -205,15 +207,15 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
       <section className="py-16 crypto-bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Live Payouts</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Live Payouts</h2>
             <p className="text-xl text-gray-300">Real-time payments to our investors</p>
           </div>
 
-          <Card className="crypto-bg-gray border-gray-600 max-w-4xl mx-auto">
+          <Card className="crypto-bg-gray border-gray-600 max-w-4xl mx-auto shadow-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold">Recent Transactions</h3>
-                <div className="flex items-center crypto-text-success text-sm">
+                <h3 className="text-xl font-semibold text-white">Recent Transactions</h3>
+                <div className="flex items-center crypto-text-success text-sm font-medium">
                   <div className="w-2 h-2 crypto-bg-success rounded-full mr-2 animate-pulse"></div>
                   Live
                 </div>
@@ -223,7 +225,7 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
                 {livePayouts.map((payout, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-4 crypto-bg-black rounded-lg"
+                    className="flex items-center justify-between p-4 crypto-bg-black rounded-lg hover:bg-gray-800 transition-colors duration-200"
                   >
                     <div className="flex items-center">
                       <div className="w-10 h-10 crypto-bg-gold rounded-full flex items-center justify-center mr-4">
@@ -232,12 +234,12 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
                         </span>
                       </div>
                       <div>
-                        <div className="font-semibold">{payout.name}</div>
+                        <div className="font-semibold text-white">{payout.name}</div>
                         <div className="text-gray-400 text-sm">{payout.plan}</div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="crypto-text-success font-semibold">
+                      <div className="crypto-text-success font-semibold text-lg">
                         ${payout.amount.toLocaleString()}
                       </div>
                       <div className="text-gray-400 text-sm">{payout.time}</div>

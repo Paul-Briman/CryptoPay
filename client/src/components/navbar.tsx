@@ -27,11 +27,11 @@ export function Navbar({ onLoginClick, onSignupClick }: NavbarProps) {
   ];
 
   return (
-    <nav className="crypto-bg-dark border-b border-gray-600 sticky top-0 z-50">
+    <nav className="crypto-bg-dark border-b border-gray-600 sticky top-0 z-50 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200">
             <Bitcoin className="h-8 w-8 crypto-text-gold" />
             <span className="text-xl font-bold crypto-text-gold">CryptoPay</span>
           </Link>

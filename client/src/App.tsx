@@ -10,6 +10,7 @@ import { SupportChat } from "./components/support-chat";
 import { Home } from "./pages/home";
 import { Dashboard } from "./pages/dashboard";
 import { Admin } from "./pages/admin";
+import { AdminLogin } from "./pages/admin-login";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -33,6 +34,7 @@ function Router() {
       <Switch>
         <Route path="/" component={() => <Home onLoginClick={handleLoginClick} onSignupClick={handleSignupClick} />} />
         <Route path="/dashboard" component={Dashboard} />
+        <Route path="/admin-login" component={AdminLogin} />
         <Route path="/admin" component={Admin} />
         <Route component={NotFound} />
       </Switch>

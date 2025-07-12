@@ -7,6 +7,13 @@ import MemoryStore from "memorystore";
 
 const MemoryStoreSession = MemoryStore(session);
 
+// Extend the Session interface to include userId
+declare module "express-session" {
+  interface SessionData {
+    userId?: number;
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Session configuration
   app.use(session({
@@ -36,7 +43,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ message: "Unauthorized" });
     }
     
-    const user = await storage.getUser(req.session.userId);
+    const userId = req.session.userId!;
+    const user = await storage.getUser(userId);
     if (!user || !user.isAdmin) {
       return res.status(403).json({ message: "Admin access required" });
     }
@@ -72,7 +80,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const loginData = loginSchema.parse(req.body);
       
-      const user = await storage.getUserByEmail(loginData.email);
+      // Try to find user by email first, then by name (for admin)
+      let user = await storage.getUserByEmail(loginData.email);
+      if (!user) {
+        user = await storage.getUserByName(loginData.email); // Allow login with username
+      }
+      
       if (!user || user.password !== loginData.password) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
@@ -101,7 +114,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/auth/me", requireAuth, async (req, res) => {
     try {
-      const user = await storage.getUser(req.session.userId);
+      const userId = req.session.userId!;
+      const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -120,13 +134,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Plan routes
   app.post("/api/plans", requireAuth, async (req, res) => {
     try {
+      const userId = req.session.userId!;
       const planData = insertUserPlanSchema.parse({
         ...req.body,
-        userId: req.session.userId
+        userId: userId
       });
       
       // Check if user already has a plan
-      const existingPlan = await storage.getUserPlan(req.session.userId);
+      const existingPlan = await storage.getUserPlan(userId);
       if (existingPlan) {
         return res.status(400).json({ message: "User already has an active plan" });
       }
@@ -140,7 +155,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/plans/my", requireAuth, async (req, res) => {
     try {
-      const plan = await storage.getUserPlan(req.session.userId);
+      const userId = req.session.userId!;
+      const plan = await storage.getUserPlan(userId);
       res.json(plan);
     } catch (error: any) {
       res.status(500).json({ message: error.message });

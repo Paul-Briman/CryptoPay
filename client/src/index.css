@@ -66,6 +66,8 @@
     @apply font-sans antialiased;
     background-color: var(--crypto-black);
     color: hsl(0, 0%, 98%);
+    margin: 0;
+    padding: 0;
   }
 }
 

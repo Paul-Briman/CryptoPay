@@ -63,20 +63,8 @@ export function Admin() {
   };
 
   if (!user) {
-    return (
-      <div className="min-h-screen crypto-bg-dark flex items-center justify-center">
-        <Card className="crypto-bg-gray border-gray-600 max-w-md">
-          <CardContent className="p-6 text-center">
-            <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
-            <p className="text-gray-300 mb-4">Please log in to access the admin panel.</p>
-            <Button onClick={() => window.location.href = "/"} className="crypto-bg-gold text-black">
-              <Home className="h-4 w-4 mr-2" />
-              Go Home
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    window.location.href = "/admin-login";
+    return null;
   }
 
   if (!user.isAdmin) {

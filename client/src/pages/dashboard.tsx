@@ -94,17 +94,17 @@ export function Dashboard() {
     <div className="min-h-screen crypto-bg-dark">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Dashboard Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold crypto-text-gold">
+            <h1 className="text-3xl md:text-4xl font-bold crypto-text-gold">
               Welcome back, {user.name}!
             </h1>
-            <p className="text-gray-300">Manage your cryptocurrency investments</p>
+            <p className="text-gray-300 text-lg">Manage your cryptocurrency investments</p>
           </div>
           <Button
             onClick={() => window.location.href = "/"}
             variant="outline"
-            className="border-gray-600 text-gray-300 hover:border-gray-500"
+            className="border-gray-600 text-gray-300 hover:border-gray-500 hover:crypto-text-gold transition-colors"
           >
             <Home className="h-4 w-4 mr-2" />
             Back to Home
@@ -236,23 +236,39 @@ export function Dashboard() {
                 ) : (
                   <div className="text-center py-12">
                     <h3 className="text-xl font-semibold mb-4">No Active Plan</h3>
-                    <p className="text-gray-300 mb-8">
+                    <p className="text-gray-300 mb-8 text-lg">
                       Select an investment plan to start earning with CryptoPay
                     </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {Object.entries(plans).map(([key, plan]) => (
                         <Card
                           key={key}
-                          className="crypto-bg-black border-gray-600 hover:crypto-border-gold transition-colors cursor-pointer"
+                          className="crypto-bg-black border-gray-600 hover:crypto-border-gold transition-all duration-200 cursor-pointer hover:shadow-lg hover:transform hover:scale-105"
                           onClick={() => handlePlanSelect(key)}
                         >
-                          <CardContent className="p-4">
-                            <h4 className="font-semibold mb-2">{plan.name}</h4>
-                            <div className="text-sm text-gray-300">
-                              <p>Investment: ${plan.investment.toLocaleString()}</p>
-                              <p>Returns: ${plan.returns.toLocaleString()}</p>
-                              <p>ROI: {plan.roi}%</p>
+                          <CardContent className="p-6">
+                            <h4 className="font-semibold mb-4 text-lg crypto-text-gold">{plan.name}</h4>
+                            <div className="space-y-2 text-sm text-gray-300">
+                              <div className="flex justify-between">
+                                <span>Investment:</span>
+                                <span className="font-semibold crypto-text-gold">${plan.investment.toLocaleString()}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Returns:</span>
+                                <span className="font-semibold crypto-text-success">${plan.returns.toLocaleString()}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>ROI:</span>
+                                <span className="font-semibold crypto-text-gold">{plan.roi}%</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Duration:</span>
+                                <span className="font-semibold text-white">{plan.duration} days</span>
+                              </div>
                             </div>
+                            <Button className="w-full mt-4 crypto-bg-gold text-black hover:bg-yellow-400 font-semibold">
+                              Select This Plan
+                            </Button>
                           </CardContent>
                         </Card>
                       ))}

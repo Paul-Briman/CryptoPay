@@ -3,6 +3,7 @@ import { users, userPlans, type User, type InsertUser, type UserPlan, type Inser
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByName(name: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   getAllUsers(): Promise<User[]>;
   
@@ -26,9 +27,9 @@ export class MemStorage implements IStorage {
     
     // Create admin user
     this.createUser({
-      name: "Admin",
+      name: "admin",
       email: "admin@cryptopay.com",
-      password: "admin123"
+      password: "1234"
     }).then(admin => {
       admin.isAdmin = true;
       this.users.set(admin.id, admin);
@@ -42,6 +43,12 @@ export class MemStorage implements IStorage {
   async getUserByEmail(email: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(
       (user) => user.email === email,
+    );
+  }
+
+  async getUserByName(name: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.name === name,
     );
   }
 
@@ -72,6 +79,7 @@ export class MemStorage implements IStorage {
     const userPlan: UserPlan = { 
       ...insertUserPlan, 
       id,
+      status: insertUserPlan.status || "pending",
       createdAt: new Date()
     };
     this.userPlans.set(id, userPlan);
