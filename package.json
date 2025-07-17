@@ -10,7 +10,7 @@
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "predeploy": "vite build",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "npm run build && gh-pages -d dist/client"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

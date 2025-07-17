@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Router as WouterRouter, Route, useLocation } from "wouter";
 import { useState } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -41,6 +41,7 @@ function Router() {
       )}
 
       <Switch>
+      <WouterRouter base="/CryptoPay">
         <Route path="/" component={() => (
           <Home
             onLoginClick={handleLoginClick}
@@ -53,6 +54,7 @@ function Router() {
         <Route path="/terms" component={Terms} />
         <Route path="/faq" component={FAQ} />
         <Route component={NotFound} />
+        </WouterRouter>
       </Switch>
 
       <AuthModal
