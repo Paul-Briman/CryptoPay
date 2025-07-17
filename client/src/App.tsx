@@ -1,4 +1,4 @@
-import { Switch, Router as WouterRouter, Route, useLocation } from "wouter";
+import { Router as WouterRouter, Route, Switch, useLocation } from "wouter";
 import { useState } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -40,6 +40,7 @@ function Router() {
         />
       )}
 
+      {/* ✅ Wrap <Switch> inside <WouterRouter> correctly */}
       <WouterRouter base="/CryptoPay">
         <Switch>
           <Route
@@ -83,3 +84,4 @@ function App() {
 }
 
 export default App;
+
