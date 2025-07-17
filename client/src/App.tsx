@@ -1,4 +1,4 @@
-import { Router as WouterRouter, Route, Switch, useLocation } from "wouter";
+import { Switch, Router as WouterRouter, Route, useLocation } from "wouter";
 import { useState } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -30,17 +30,20 @@ function Router() {
     setAuthModalOpen(true);
   };
 
-  return (
-    <div className="min-h-screen crypto-bg-black">
-      {/* Hide Navbar on /terms page */}
-      {location !== "/terms" && (
-        <Navbar
-          onLoginClick={handleLoginClick}
-          onSignupClick={handleSignupClick}
-        />
-      )}
+  // Normalize route to ignore base
+  const normalizedPath = location.replace("/CryptoPay", "") || "/";
 
-      {/* ✅ Wrap <Switch> inside <WouterRouter> correctly */}
+  
+return (
+  <div className="min-h-screen crypto-bg-black">
+    {/* Hide Navbar on terms, faq, admin-login, and admin pages */}
+    {!["/terms", "/faq", "/admin-login", "/admin"].includes(normalizedPath) && (
+      <Navbar
+        onLoginClick={handleLoginClick}
+        onSignupClick={handleSignupClick}
+      />
+    )}
+
       <WouterRouter base="/CryptoPay">
         <Switch>
           <Route
@@ -84,4 +87,5 @@ function App() {
 }
 
 export default App;
+
 
