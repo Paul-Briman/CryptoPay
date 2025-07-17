@@ -40,22 +40,25 @@ function Router() {
         />
       )}
 
-      <Switch>
       <WouterRouter base="/CryptoPay">
-        <Route path="/" component={() => (
-          <Home
-            onLoginClick={handleLoginClick}
-            onSignupClick={handleSignupClick}
+        <Switch>
+          <Route
+            path="/"
+            component={() => (
+              <Home
+                onLoginClick={handleLoginClick}
+                onSignupClick={handleSignupClick}
+              />
+            )}
           />
-        )} />
-        <Route path="/dashboard" component={Dashboard} />
-        <Route path="/admin-login" component={AdminLogin} />
-        <Route path="/admin" component={Admin} />
-        <Route path="/terms" component={Terms} />
-        <Route path="/faq" component={FAQ} />
-        <Route component={NotFound} />
-        </WouterRouter>
-      </Switch>
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/admin-login" component={AdminLogin} />
+          <Route path="/admin" component={Admin} />
+          <Route path="/terms" component={Terms} />
+          <Route path="/faq" component={FAQ} />
+          <Route component={NotFound} />
+        </Switch>
+      </WouterRouter>
 
       <AuthModal
         isOpen={authModalOpen}
@@ -80,4 +83,3 @@ function App() {
 }
 
 export default App;
-
