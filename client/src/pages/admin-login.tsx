@@ -1,3 +1,4 @@
+import { useLocation } from "wouter";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +16,7 @@ import type { LoginData } from "@shared/schema";
 export function AdminLogin() {
   const { toast } = useToast();
   const login = useLogin();
+  const [, setLocation] = useLocation(); // ✅ useLocation for route change
 
   const form = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
@@ -32,7 +34,7 @@ export function AdminLogin() {
             title: "Welcome, Admin!",
             description: "You have been successfully logged in to the admin panel.",
           });
-          window.location.href = "/admin";
+          setLocation("/admin"); // ✅ client-side navigation
         } else {
           toast({
             title: "Access Denied",

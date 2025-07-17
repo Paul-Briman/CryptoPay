@@ -1,34 +1,55 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express from "express";
+import session from "express-session";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import type { Request, Response, NextFunction } from "express";
 
 const app = express();
+
+// ✅ CORS for frontend on Vite (adjust port if needed)
+app.use(
+  cors({
+    origin: "http://localhost:5173", // frontend dev server
+    credentials: true,
+  })
+);
+
+// ✅ Body parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// ✅ Session middleware
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "super-secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: false, // Set to true in production
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+    },
+  })
+);
+
+// ✅ Optional: log API responses
 app.use((req, res, next) => {
   const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
+  let capturedResponse: any;
+  const origJson = res.json;
+  res.json = function (body, ...args) {
+    capturedResponse = body;
+    return origJson.call(this, body, ...args);
   };
 
   res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+    if (req.path.startsWith("/api")) {
+      const time = Date.now() - start;
+      let logLine = `${req.method} ${req.path} ${res.statusCode} - ${time}ms`;
+      if (capturedResponse) {
+        logLine += ` :: ${JSON.stringify(capturedResponse)}`;
       }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
       log(logLine);
     }
   });
@@ -36,36 +57,32 @@ app.use((req, res, next) => {
   next();
 });
 
+// ✅ Register API routes
 (async () => {
-  const server = await registerRoutes(app);
+  try {
+    const server = await registerRoutes(app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    // ✅ Error handler
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      console.error("❌ Error:", err.message);
+      res.status(err.status || 500).json({ message: err.message || "Server error" });
+    });
 
-    res.status(status).json({ message });
-    throw err;
-  });
+    // ✅ Serve frontend only in production
+    if (process.env.NODE_ENV === "production") {
+      serveStatic(app);
+    } else {
+      // You can skip this entirely if Vite is running separately on port 5173
+      await setupVite(app, server); 
+    }
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
+    const port = parseInt(process.env.PORT || "3000", 10);
+    server.listen(port, "127.0.0.1", () => {
+      log(`✅ Server running at http://127.0.0.1:${port}`);
+    });
+  } catch (err) {
+    console.error("❌ Server startup error:", err);
   }
-
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
 })();
+
+

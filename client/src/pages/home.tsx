@@ -5,7 +5,19 @@ import { useBitcoinPrice } from "../lib/bitcoin";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
-import { Bitcoin, Shield, TrendingUp, Headphones, Circle, Trophy, CreditCard, Gem, ChartBar } from "lucide-react";
+import {
+  Bitcoin,
+  Shield,
+  TrendingUp,
+  Headphones,
+  Circle,
+  Trophy,
+  CreditCard,
+  Gem,
+  ChartBar,
+  Star,
+  ThumbsUp,
+} from "lucide-react";
 
 interface HomeProps {
   onLoginClick: () => void;
@@ -65,16 +77,33 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
   ];
 
   const payoutData = [
-    { name: "James W.", plan: "Platinum Plan", amount: 15000, time: "1 min ago" },
+    {
+      name: "James W.",
+      plan: "Platinum Plan",
+      amount: 15000,
+      time: "1 min ago",
+    },
     { name: "Alex K.", plan: "Gold Plan", amount: 6500, time: "5 min ago" },
     { name: "Maria S.", plan: "Basic Plan", amount: 2000, time: "8 min ago" },
-    { name: "Chen L.", plan: "Diamond Plan", amount: 50000, time: "12 min ago" },
-    { name: "Ahmed R.", plan: "Platinum Plan", amount: 15000, time: "18 min ago" },
+    {
+      name: "Chen L.",
+      plan: "Diamond Plan",
+      amount: 50000,
+      time: "12 min ago",
+    },
+    {
+      name: "Ahmed R.",
+      plan: "Platinum Plan",
+      amount: 15000,
+      time: "18 min ago",
+    },
   ];
 
   useEffect(() => {
     const updatePayouts = () => {
-      const shuffled = [...payoutData].sort(() => Math.random() - 0.5).slice(0, 3);
+      const shuffled = [...payoutData]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3);
       setLivePayouts(shuffled);
     };
 
@@ -84,9 +113,9 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
   }, []);
 
   const handleStartInvesting = () => {
-    if (user) {
+    if (user && user.role !== "admin") {
       window.location.href = "/dashboard";
-    } else {
+    } else if (!user) {
       onSignupClick();
     }
   };
@@ -94,7 +123,10 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center crypto-bg-black">
+      <section
+        id="home"
+        className="relative min-h-screen flex items-center justify-center crypto-bg-black"
+      >
         <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black"></div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
@@ -102,9 +134,9 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
             <span className="crypto-text-gold">Bitcoin</span>
           </h1>
           <p className="text-lg md:text-xl lg:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
-            Bitcoin is secure, limited in supply, borderless, and has made thousands of
-            millionaires. Join the digital revolution and multiply your investment with our proven
-            strategies.
+            Bitcoin is secure, limited in supply, borderless, and has made
+            thousands of millionaires. Join the digital revolution and multiply
+            your investment with our proven strategies.
           </p>
 
           {/* Live Bitcoin Price */}
@@ -112,14 +144,27 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
             <CardContent className="p-6">
               <div className="flex items-center justify-center mb-2">
                 <Bitcoin className="crypto-text-gold h-8 w-8 mr-2" />
-                <span className="text-gray-300 font-medium">Live Bitcoin Price</span>
+                <span className="text-gray-300 font-medium">
+                  Live Bitcoin Price
+                </span>
               </div>
               <div className="text-3xl md:text-4xl font-bold crypto-text-gold mb-1">
                 ${bitcoinPrice?.price?.toLocaleString() || "117,672.00"}
               </div>
-              <div className={`text-sm flex items-center justify-center ${bitcoinPrice?.change && bitcoinPrice.change > 0 ? 'crypto-text-success' : 'crypto-text-error'}`}>
+              <div
+                className={`text-sm flex items-center justify-center ${
+                  bitcoinPrice?.change && bitcoinPrice.change > 0
+                    ? "crypto-text-success"
+                    : "crypto-text-error"
+                }`}
+              >
                 <ChartBar className="w-4 h-4 mr-1" />
-                {bitcoinPrice?.change ? `${bitcoinPrice.change > 0 ? '+' : ''}${bitcoinPrice.change.toFixed(2)}%` : '+0.96%'} (24h)
+                {bitcoinPrice?.change
+                  ? `${
+                      bitcoinPrice.change > 0 ? "+" : ""
+                    }${bitcoinPrice.change.toFixed(2)}%`
+                  : "+0.96%"}{" "}
+                (24h)
               </div>
             </CardContent>
           </Card>
@@ -137,7 +182,7 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
               size="lg"
               className="border-2 crypto-border-gold crypto-text-gold hover:crypto-bg-gold hover:text-black px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-200"
             >
-              Learn More
+              <a href="#how-it-works">Learn More</a>
             </Button>
           </div>
         </div>
@@ -147,8 +192,12 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
       <section id="plans" className="py-16 crypto-bg-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Investment Plans</h2>
-            <p className="text-xl text-gray-300">Choose the plan that fits your investment goals</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
+              Investment Plans
+            </h2>
+            <p className="text-xl text-gray-300">
+              Choose the plan that fits your investment goals
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -171,26 +220,40 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
                   <CardContent className="p-6">
                     <div className="text-center mb-4">
                       <Icon className="crypto-text-gold h-12 w-12 mx-auto mb-3" />
-                      <h3 className="text-xl font-semibold text-white">{plan.name}</h3>
+                      <h3 className="text-xl font-semibold text-white">
+                        {plan.name}
+                      </h3>
                     </div>
                     <div className="text-center mb-6">
                       <div className="text-3xl font-bold crypto-text-gold mb-2">
                         ${plan.investment.toLocaleString()}
                       </div>
-                      <div className="text-gray-300 text-sm">Minimum Investment</div>
+                      <div className="text-gray-300 text-sm">
+                        Minimum Investment
+                      </div>
                     </div>
                     <div className="crypto-bg-black rounded-lg p-4 mb-6">
                       <div className="text-center">
-                        <div className="text-gray-300 text-sm mb-1">Returns in {plan.duration} days</div>
+                        <div className="text-gray-300 text-sm mb-1">
+                          Returns in {plan.duration} days
+                        </div>
                         <div className="text-2xl font-bold crypto-text-success">
                           ${plan.returns.toLocaleString()}
                         </div>
-                        <div className="crypto-text-gold text-sm font-semibold">{plan.roi}% ROI</div>
-                        <div className="text-gray-400 text-xs">{plan.multiplier} multiplier</div>
+                        <div className="crypto-text-gold text-sm font-semibold">
+                          {plan.roi}% ROI
+                        </div>
+                        <div className="text-gray-400 text-xs">
+                          {plan.multiplier} multiplier
+                        </div>
                       </div>
                     </div>
                     <Button
-                      onClick={() => user ? window.location.href = "/dashboard" : onSignupClick()}
+                      onClick={() =>
+                        user
+                          ? (window.location.href = "/dashboard")
+                          : onSignupClick()
+                      }
                       className="w-full crypto-bg-gold text-black hover:bg-yellow-400 font-semibold py-3 rounded-lg transition-all duration-200"
                     >
                       Select Plan
@@ -207,14 +270,20 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
       <section className="py-16 crypto-bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Live Payouts</h2>
-            <p className="text-xl text-gray-300">Real-time payments to our investors</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
+              Live Payouts
+            </h2>
+            <p className="text-xl text-gray-300">
+              Real-time payments to our investors
+            </p>
           </div>
 
           <Card className="crypto-bg-gray border-gray-600 max-w-4xl mx-auto shadow-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-white">Recent Transactions</h3>
+                <h3 className="text-xl font-semibold text-white">
+                  Recent Transactions
+                </h3>
                 <div className="flex items-center crypto-text-success text-sm font-medium">
                   <div className="w-2 h-2 crypto-bg-success rounded-full mr-2 animate-pulse"></div>
                   Live
@@ -234,8 +303,12 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
                         </span>
                       </div>
                       <div>
-                        <div className="font-semibold text-white">{payout.name}</div>
-                        <div className="text-gray-400 text-sm">{payout.plan}</div>
+                        <div className="font-semibold text-white">
+                          {payout.name}
+                        </div>
+                        <div className="text-gray-400 text-sm">
+                          {payout.plan}
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">
@@ -257,7 +330,9 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-8">Why Choose Bitcoin Investment?</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-8">
+                Why Choose Bitcoin Investment?
+              </h2>
 
               <div className="space-y-6">
                 <div className="flex items-start">
@@ -265,9 +340,12 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
                     <Shield className="text-black h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">Secure & Regulated</h3>
+                    <h3 className="text-xl font-semibold mb-2">
+                      Secure & Regulated
+                    </h3>
                     <p className="text-gray-300">
-                      Our platform uses bank-level security and follows strict regulatory compliance to protect your investments.
+                      Our platform uses bank-level security and follows strict
+                      regulatory compliance to protect your investments.
                     </p>
                   </div>
                 </div>
@@ -277,9 +355,12 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
                     <TrendingUp className="text-black h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">Proven Returns</h3>
+                    <h3 className="text-xl font-semibold mb-2">
+                      Proven Returns
+                    </h3>
                     <p className="text-gray-300">
-                      Our expert trading algorithms have consistently delivered exceptional returns for our investors since 2019.
+                      Our expert trading algorithms have consistently delivered
+                      exceptional returns for our investors since 2019.
                     </p>
                   </div>
                 </div>
@@ -291,7 +372,8 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
                   <div>
                     <h3 className="text-xl font-semibold mb-2">24/7 Support</h3>
                     <p className="text-gray-300">
-                      Our dedicated support team is available around the clock to assist you with any questions or concerns.
+                      Our dedicated support team is available around the clock
+                      to assist you with any questions or concerns.
                     </p>
                   </div>
                 </div>
@@ -303,9 +385,12 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
                 <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-transparent"></div>
                 <div className="relative z-10">
                   <ChartBar className="crypto-text-gold h-16 w-16 mb-4" />
-                  <h3 className="text-2xl font-bold mb-4">Professional Trading</h3>
+                  <h3 className="text-2xl font-bold mb-4">
+                    Professional Trading
+                  </h3>
                   <p className="text-gray-300">
-                    Advanced algorithms and market analysis ensure optimal investment performance.
+                    Advanced algorithms and market analysis ensure optimal
+                    investment performance.
                   </p>
                 </div>
               </Card>
@@ -314,18 +399,95 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
         </div>
       </section>
 
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-20 crypto-bg-black">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold text-white mb-12">How It Works</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="p-6 crypto-bg-dark rounded-lg shadow-md">
+              <Star className="crypto-text-gold h-10 w-10 mb-4 mx-auto" />
+              <h3 className="text-xl font-semibold text-white mb-2">
+                Choose a Plan
+              </h3>
+              <p className="text-gray-300">
+                Browse our carefully designed investment plans tailored to your
+                goals.
+              </p>
+            </div>
+            <div className="p-6 crypto-bg-dark rounded-lg shadow-md">
+              <Bitcoin className="crypto-text-gold h-10 w-10 mb-4 mx-auto" />
+              <h3 className="text-xl font-semibold text-white mb-2">
+                Deposit Bitcoin
+              </h3>
+              <p className="text-gray-300">
+                Deposit your Bitcoin securely using our seamless payment
+                interface.
+              </p>
+            </div>
+            <div className="p-6 crypto-bg-dark rounded-lg shadow-md">
+              <TrendingUp className="crypto-text-gold h-10 w-10 mb-4 mx-auto" />
+              <h3 className="text-xl font-semibold text-white mb-2">
+                Watch it Grow
+              </h3>
+              <p className="text-gray-300">
+                Sit back and watch your investment grow with our automated
+                trading system.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 crypto-bg-dark">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold text-white mb-12">
+            What Our Investors Say
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="p-6 crypto-bg-black rounded-lg shadow-md">
+              <p className="text-gray-300 italic mb-4">
+                “CryptoPay helped me multiply my savings in just one week. Best
+                decision I made in 2024!”
+              </p>
+              <div className="font-semibold crypto-text-gold">Samantha L.</div>
+            </div>
+            <div className="p-6 crypto-bg-black rounded-lg shadow-md">
+              <p className="text-gray-300 italic mb-4">
+                “I was skeptical at first, but the support and returns are
+                unmatched. Highly recommended!”
+              </p>
+              <div className="font-semibold crypto-text-gold">Marcus G.</div>
+            </div>
+            <div className="p-6 crypto-bg-black rounded-lg shadow-md">
+              <p className="text-gray-300 italic mb-4">
+                “Simple process, secure platform, and real results. CryptoPay
+                delivers on its promise.”
+              </p>
+              <div className="font-semibold crypto-text-gold">Angela R.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer id="contact" className="crypto-bg-black border-t border-gray-600 py-12">
+      <footer
+        id="contact"
+        className="crypto-bg-black border-t border-gray-600 py-12"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
               <div className="flex items-center mb-4">
                 <Bitcoin className="crypto-text-gold h-8 w-8 mr-2" />
-                <span className="text-xl font-bold crypto-text-gold">CryptoPay</span>
+                <span className="text-xl font-bold crypto-text-gold">
+                  CryptoPay
+                </span>
               </div>
               <p className="text-gray-300">
-                Your trusted partner in cryptocurrency investment. We provide secure, profitable,
-                and transparent investment opportunities in the digital currency market.
+                Your trusted partner in cryptocurrency investment. We provide
+                secure, profitable, and transparent investment opportunities in
+                the digital currency market.
               </p>
             </div>
 
@@ -333,22 +495,34 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
               <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="#about" className="text-gray-300 crypto-hover-gold transition-colors">
+                  <a
+                    href="#about"
+                    className="text-gray-300 crypto-hover-gold transition-colors"
+                  >
                     About Us
                   </a>
                 </li>
                 <li>
-                  <a href="#plans" className="text-gray-300 crypto-hover-gold transition-colors">
+                  <a
+                    href="#plans"
+                    className="text-gray-300 crypto-hover-gold transition-colors"
+                  >
                     Investment Plans
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-300 crypto-hover-gold transition-colors">
+                  <a
+                    href="/faq"
+                    className="text-gray-300 crypto-hover-gold transition-colors"
+                  >
                     FAQ
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-300 crypto-hover-gold transition-colors">
+                  <a
+                    href="/terms"
+                    className="text-gray-300 crypto-hover-gold transition-colors"
+                  >
                     Terms of Service
                   </a>
                 </li>
@@ -358,15 +532,19 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
             <div>
               <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
               <ul className="space-y-2">
-                <li className="text-gray-300">support@cryptopay.com</li>
+                <li className="text-gray-300">thecryptopayteam@gmail.com</li>
                 <li className="text-gray-300">+1 (865) 356-5182</li>
-                <li className="text-gray-300">123 Crypto Street, Digital City</li>
+                <li className="text-gray-300">
+                  123 Crypto Street, Digital City
+                </li>
               </ul>
             </div>
           </div>
 
           <div className="border-t border-gray-600 mt-8 pt-8 text-center">
-            <p className="text-gray-300">&copy; 2024 CryptoPay. All rights reserved.</p>
+            <p className="text-gray-300">
+              &copy; 2025 CryptoPay. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>

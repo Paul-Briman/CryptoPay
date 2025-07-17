@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { useState, useEffect } from "react";
+import { Link as WouterLink, useLocation } from "wouter";
 import { useAuth, useLogout } from "../lib/auth";
 import { Button } from "./ui/button";
 import { Menu, X, Bitcoin } from "lucide-react";
@@ -11,61 +11,99 @@ interface NavbarProps {
 
 export function Navbar({ onLoginClick, onSignupClick }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [location] = useLocation();
+  const [activeSection, setActiveSection] = useState("home");
   const { data: user } = useAuth();
   const logout = useLogout();
+  const [location, setLocation] = useLocation();
 
-  const handleLogout = () => {
-    logout.mutate();
-  };
+  const handleLogout = () => logout.mutate();
 
   const navItems = [
-    { href: "/", label: "Home" },
-    { href: "/#plans", label: "Plans" },
-    { href: "/#about", label: "About" },
-    { href: "/#contact", label: "Contact" },
+    { href: "home", label: "Home" },
+    { href: "plans", label: "Plans" },
+    { href: "about", label: "About" },
+    { href: "contact", label: "Contact" },
   ];
+
+  const handleNavClick = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const yOffset = -80;
+      const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+      setActiveSection(id);
+    }
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleTermsClick = () => {
+    if (location === "/terms") {
+      // Force re-navigate to same route
+      setLocation("/"); // Go elsewhere
+      requestAnimationFrame(() => setLocation("/terms")); // Then return
+    } else {
+      setLocation("/terms");
+    }
+    setIsMobileMenuOpen(false);
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      for (const item of navItems) {
+        const section = document.getElementById(item.href);
+        if (section) {
+          const offset = section.offsetTop - 100;
+          const height = section.offsetHeight;
+          if (scrollY >= offset && scrollY < offset + height) {
+            setActiveSection(item.href);
+          }
+        }
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <nav className="crypto-bg-dark border-b border-gray-600 sticky top-0 z-50 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200">
+          <WouterLink href="/" className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200">
             <Bitcoin className="h-8 w-8 crypto-text-gold" />
             <span className="text-xl font-bold crypto-text-gold">CryptoPay</span>
-          </Link>
+          </WouterLink>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              <Link
+              <button
                 key={item.href}
-                href={item.href}
-                className={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
-                  location === item.href
+                onClick={() => handleNavClick(item.href)}
+                className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors ${
+                  activeSection === item.href
                     ? "crypto-text-gold crypto-border-gold"
-                    : "text-gray-300 border-transparent crypto-hover-gold hover:crypto-border-gold"
+                    : "text-gray-300 border-transparent hover:crypto-text-gold hover:border-gold"
                 }`}
               >
                 {item.label}
-              </Link>
+              </button>
             ))}
+            <button
+              onClick={handleTermsClick}
+              className="px-3 py-2 text-sm font-medium text-gray-300 hover:crypto-text-gold"
+            >
+              Terms
+            </button>
           </div>
 
-          {/* Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <>
-                <Link href="/dashboard">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black"
-                  >
+                <WouterLink href="/dashboard">
+                  <Button variant="outline" size="sm" className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black">
                     Dashboard
                   </Button>
-                </Link>
+                </WouterLink>
                 <Button
                   variant="outline"
                   size="sm"
@@ -96,7 +134,6 @@ export function Navbar({ onLoginClick, onSignupClick }: NavbarProps) {
             )}
           </div>
 
-          {/* Mobile menu button */}
           <div className="md:hidden">
             <Button
               variant="ghost"
@@ -110,69 +147,75 @@ export function Navbar({ onLoginClick, onSignupClick }: NavbarProps) {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
       {isMobileMenuOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 crypto-bg-gray">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`block px-3 py-2 text-base font-medium ${
-                  location === item.href
-                    ? "crypto-text-gold"
-                    : "text-gray-300 crypto-hover-gold"
-                }`}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <hr className="border-gray-600 my-2" />
-            {user ? (
-              <>
-                <Link
-                  href="/dashboard"
-                  className="block px-3 py-2 text-base font-medium text-gray-300 crypto-hover-gold"
+        <div className="md:hidden px-4 pt-2 pb-4 crypto-bg-gray space-y-2">
+          {navItems.map((item) => (
+            <button
+              key={item.href}
+              onClick={() => handleNavClick(item.href)}
+              className={`block w-full text-left px-3 py-2 text-base font-medium rounded ${
+                activeSection === item.href ? "crypto-text-gold" : "text-gray-300 hover:crypto-text-gold"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+          <button
+            onClick={handleTermsClick}
+            className="block w-full text-left px-3 py-2 text-base font-medium text-gray-300 hover:crypto-text-gold"
+          >
+            Terms
+          </button>
+
+          <hr className="border-gray-600 my-2" />
+
+          {user ? (
+            <>
+              <WouterLink href="/dashboard">
+                <button
                   onClick={() => setIsMobileMenuOpen(false)}
+                  className="block w-full text-left px-3 py-2 text-base font-medium text-gray-300 hover:crypto-text-gold"
                 >
                   Dashboard
-                </Link>
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="block w-full text-left px-3 py-2 text-base font-medium text-gray-300 crypto-hover-gold"
-                >
-                  Logout
                 </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => {
-                    onLoginClick();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="block w-full text-left px-3 py-2 text-base font-medium text-gray-300 crypto-hover-gold"
-                >
-                  Login
-                </button>
-                <button
-                  onClick={() => {
-                    onSignupClick();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="block w-full text-left px-3 py-2 text-base font-medium crypto-text-gold"
-                >
-                  Sign Up
-                </button>
-              </>
-            )}
-          </div>
+              </WouterLink>
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-base font-medium text-gray-300 hover:crypto-text-gold"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => {
+                  onLoginClick();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-base font-medium text-gray-300 hover:crypto-text-gold"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => {
+                  onSignupClick();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-base font-medium crypto-text-gold"
+              >
+                Sign Up
+              </button>
+            </>
+          )}
         </div>
       )}
     </nav>
   );
 }
+
+
+

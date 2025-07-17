@@ -1,164 +1,214 @@
-import { users, userPlans, type User, type InsertUser, type UserPlan, type InsertUserPlan } from "@shared/schema";
+import bcrypt from "bcrypt";
+import {
+  users,
+  userPlans,
+  type User,
+  type ServerInsertUser,
+  type UserPlan,
+  type InsertUserPlan,
+} from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
 export interface IStorage {
-  getUser(id: number): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
-  getUserByName(name: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getUser(id: number): Promise<(User & { role: string }) | undefined>;
+  getUserByEmail(email: string): Promise<(User & { role: string }) | undefined>;
+  getUserByName(name: string): Promise<(User & { role: string }) | undefined>;
+  createUser(user: ServerInsertUser): Promise<User & { role: string }>;
   getAllUsers(): Promise<User[]>;
-  
+  deleteUser(userId: number): Promise<boolean>;
+  getWallet(userId: number): Promise<number | null>;
+  updateWalletBalance(userId: number, newBalance: number): Promise<boolean>;
+
   getUserPlan(userId: number): Promise<UserPlan | undefined>;
+  getUserPlans(userId: number): Promise<UserPlan[]>;
   createUserPlan(userPlan: InsertUserPlan): Promise<UserPlan>;
   updateUserPlanStatus(id: number, status: string): Promise<UserPlan | undefined>;
+  activateUserPlan(planId: number): Promise<UserPlan | undefined>;
   getAllUserPlans(): Promise<UserPlan[]>;
-}
+  getAllUserPlansWithUserDetails(): Promise<
+    (UserPlan & { user: { name: string; email: string } | null })[]
+  >;
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private userPlans: Map<number, UserPlan>;
-  private currentUserId: number;
-  private currentUserPlanId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.userPlans = new Map();
-    this.currentUserId = 1;
-    this.currentUserPlanId = 1;
-    
-    // Create admin user
-    this.createUser({
-      name: "admin",
-      email: "admin@cryptopay.com",
-      password: "1234"
-    }).then(admin => {
-      admin.isAdmin = true;
-      this.users.set(admin.id, admin);
-    });
-  }
-
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.email === email,
-    );
-  }
-
-  async getUserByName(name: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.name === name,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { 
-      ...insertUser, 
-      id,
-      isAdmin: false,
-      createdAt: new Date()
-    };
-    this.users.set(id, user);
-    return user;
-  }
-
-  async getAllUsers(): Promise<User[]> {
-    return Array.from(this.users.values());
-  }
-
-  async getUserPlan(userId: number): Promise<UserPlan | undefined> {
-    return Array.from(this.userPlans.values()).find(
-      (plan) => plan.userId === userId,
-    );
-  }
-
-  async createUserPlan(insertUserPlan: InsertUserPlan): Promise<UserPlan> {
-    const id = this.currentUserPlanId++;
-    const userPlan: UserPlan = { 
-      ...insertUserPlan, 
-      id,
-      status: insertUserPlan.status || "pending",
-      createdAt: new Date()
-    };
-    this.userPlans.set(id, userPlan);
-    return userPlan;
-  }
-
-  async updateUserPlanStatus(id: number, status: string): Promise<UserPlan | undefined> {
-    const plan = this.userPlans.get(id);
-    if (plan) {
-      plan.status = status;
-      this.userPlans.set(id, plan);
-      return plan;
-    }
-    return undefined;
-  }
-
-  async getAllUserPlans(): Promise<UserPlan[]> {
-    return Array.from(this.userPlans.values());
-  }
+  updateUserPasswordByEmail(email: string, newPassword: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
-  async getUser(id: number): Promise<User | undefined> {
+  constructor() {
+    this.ensureAdminUser();
+  }
+
+  private async ensureAdminUser() {
+    const [admin] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, "admin@cryptopay.com"));
+
+    if (!admin) {
+      const hashedPassword = await bcrypt.hash("1234", 10);
+
+      await db.insert(users).values({
+        name: "admin",
+        email: "admin@cryptopay.com",
+        password: hashedPassword,
+        isAdmin: true,
+        phonePrefix: "+234",
+        phoneNumber: "0000000000",
+      });
+
+      console.log("✅ Admin user created: admin@cryptopay.com / 1234");
+    }
+  }
+
+  private addRole(user?: User): (User & { role: string }) | undefined {
+    if (!user) return undefined;
+    return {
+      ...user,
+      role: user.isAdmin ? "admin" : "user",
+    };
+  }
+
+  async getUser(id: number): Promise<(User & { role: string }) | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
+    return this.addRole(user);
   }
 
-  async getUserByEmail(email: string): Promise<User | undefined> {
+  async getUserByEmail(email: string): Promise<(User & { role: string }) | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user || undefined;
+    return this.addRole(user);
   }
 
-  async getUserByName(name: string): Promise<User | undefined> {
+  async getUserByName(name: string): Promise<(User & { role: string }) | undefined> {
     const [user] = await db.select().from(users).where(eq(users.name, name));
-    return user || undefined;
+    return this.addRole(user);
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(insertUser)
-      .returning();
-    return user;
+  async createUser(user: ServerInsertUser): Promise<User & { role: string }> {
+    await db.insert(users).values(user);
+    const [newUser] = await db.select().from(users).where(eq(users.email, user.email));
+    return this.addRole(newUser)!;
   }
 
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users);
   }
 
+  async deleteUser(userId: number): Promise<boolean> {
+    await db.delete(userPlans).where(eq(userPlans.userId, userId));
+    await db.delete(users).where(eq(users.id, userId));
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    return !user;
+  }
+
   async getUserPlan(userId: number): Promise<UserPlan | undefined> {
-    const [userPlan] = await db
-      .select()
-      .from(userPlans)
-      .where(eq(userPlans.userId, userId));
+    const [userPlan] = await db.select().from(userPlans).where(eq(userPlans.userId, userId));
     return userPlan || undefined;
   }
 
-  async createUserPlan(insertUserPlan: InsertUserPlan): Promise<UserPlan> {
-    const [userPlan] = await db
-      .insert(userPlans)
-      .values(insertUserPlan)
-      .returning();
-    return userPlan;
+  async getUserPlans(userId: number): Promise<UserPlan[]> {
+    return await db.select().from(userPlans).where(eq(userPlans.userId, userId));
+  }
+
+  async createUserPlan(userPlan: InsertUserPlan): Promise<UserPlan> {
+    await db.insert(userPlans).values(userPlan);
+    const [plan] = await db
+      .select()
+      .from(userPlans)
+      .where(eq(userPlans.userId, userPlan.userId));
+    return plan!;
   }
 
   async updateUserPlanStatus(id: number, status: string): Promise<UserPlan | undefined> {
-    const [updatedPlan] = await db
-      .update(userPlans)
-      .set({ status })
-      .where(eq(userPlans.id, id))
-      .returning();
-    return updatedPlan || undefined;
+    await db.update(userPlans).set({ status }).where(eq(userPlans.id, id));
+    const [updated] = await db.select().from(userPlans).where(eq(userPlans.id, id));
+    return updated;
   }
 
-  async getAllUserPlans(): Promise<UserPlan[]> {
-    return await db.select().from(userPlans);
+  async activateUserPlan(planId: number): Promise<UserPlan | undefined> {
+    await db.update(userPlans).set({ status: "active" }).where(eq(userPlans.id, planId));
+    const [updated] = await db.select().from(userPlans).where(eq(userPlans.id, planId));
+    return updated;
+  }
+
+  async getAllUserPlans(): Promise<
+    (UserPlan & { user: { name: string; email: string } | null })[]
+  > {
+    const plans = await db
+      .select({
+        id: userPlans.id,
+        userId: userPlans.userId,
+        planType: userPlans.planType,
+        investmentAmount: userPlans.investmentAmount,
+        expectedReturn: userPlans.expectedReturn,
+        roi: userPlans.roi,
+        status: userPlans.status,
+        createdAt: userPlans.createdAt,
+        user: {
+          name: users.name,
+          email: users.email,
+        },
+      })
+      .from(userPlans)
+      .leftJoin(users, eq(userPlans.userId, users.id));
+
+    return plans;
+  }
+
+ async getWallet(userId: number): Promise<number> {
+  const [user] = await db
+    .select({ walletBalance: users.walletBalance })
+    .from(users)
+    .where(eq(users.id, userId));
+
+  return user ? parseFloat(user.walletBalance) : 0;
+}
+
+
+  async updateWalletBalance(userId: number, newBalance: number): Promise<boolean> {
+    const result = await db
+      .update(users)
+      .set({ walletBalance: newBalance.toString() }) // ✅ fixed snake_case
+      .where(eq(users.id, userId))
+      .execute();
+
+    return Array.isArray(result) ? result.length > 0 : true;
+  }
+
+  async getAllUserPlansWithUserDetails(): Promise<
+    (UserPlan & { user: { name: string; email: string } | null })[]
+  > {
+    const result = await db
+      .select({
+        id: userPlans.id,
+        userId: userPlans.userId,
+        planType: userPlans.planType,
+        investmentAmount: userPlans.investmentAmount,
+        expectedReturn: userPlans.expectedReturn,
+        roi: userPlans.roi,
+        status: userPlans.status,
+        createdAt: userPlans.createdAt,
+        user: {
+          name: users.name,
+          email: users.email,
+        },
+      })
+      .from(userPlans)
+      .leftJoin(users, eq(userPlans.userId, users.id));
+
+    return result;
+  }
+
+  async updateUserPasswordByEmail(email: string, newPassword: string): Promise<boolean> {
+    const result = await db
+      .update(users)
+      .set({ password: newPassword })
+      .where(eq(users.email, email))
+      .execute();
+
+    return Array.isArray(result) ? result.length > 0 : true;
   }
 }
 
 export const storage = new DatabaseStorage();
+
+

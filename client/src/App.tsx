@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { useState } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -12,10 +12,13 @@ import { Dashboard } from "./pages/dashboard";
 import { Admin } from "./pages/admin";
 import { AdminLogin } from "./pages/admin-login";
 import NotFound from "@/pages/not-found";
+import Terms from "@/pages/terms";
+import FAQ from "@/pages/faq";
 
 function Router() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [location] = useLocation();
 
   const handleLoginClick = () => {
     setAuthMode("login");
@@ -29,13 +32,26 @@ function Router() {
 
   return (
     <div className="min-h-screen crypto-bg-black">
-      <Navbar onLoginClick={handleLoginClick} onSignupClick={handleSignupClick} />
-      
+      {/* Hide Navbar on /terms page */}
+      {location !== "/terms" && (
+        <Navbar
+          onLoginClick={handleLoginClick}
+          onSignupClick={handleSignupClick}
+        />
+      )}
+
       <Switch>
-        <Route path="/" component={() => <Home onLoginClick={handleLoginClick} onSignupClick={handleSignupClick} />} />
+        <Route path="/" component={() => (
+          <Home
+            onLoginClick={handleLoginClick}
+            onSignupClick={handleSignupClick}
+          />
+        )} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/admin-login" component={AdminLogin} />
         <Route path="/admin" component={Admin} />
+        <Route path="/terms" component={Terms} />
+        <Route path="/faq" component={FAQ} />
         <Route component={NotFound} />
       </Switch>
 
@@ -62,3 +78,4 @@ function App() {
 }
 
 export default App;
+
