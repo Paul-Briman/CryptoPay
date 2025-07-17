@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { viteSingleFile } from 'vite-plugin-singlefile';
 
 // Use async function to handle await
 export default (async () => {
@@ -13,7 +14,7 @@ export default (async () => {
   return defineConfig({
     base: "/CryptoPay/",
 
-    plugins: [react(), runtimeErrorOverlay(), ...cartographerPlugin],
+    plugins: [react(), viteSingleFile(), runtimeErrorOverlay(), ...cartographerPlugin],
 
     resolve: {
       alias: {

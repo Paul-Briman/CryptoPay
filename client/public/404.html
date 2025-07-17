@@ -1,11 +1,19 @@
-<!-- client/404.html -->
+<!-- public/404.html -->
 <!DOCTYPE html>
 <html>
   <head>
-    <meta http-equiv="refresh" content="0; url=/CryptoPay/" />
+    <meta charset="utf-8">
+    <title>Redirecting...</title>
+    <meta http-equiv="refresh" content="0; url=/CryptoPay/">
+    <script>
+      // For clean URLs (like /terms), rewrite to base path with pathname
+      const pathname = location.pathname.replace(/^\/CryptoPay/, '');
+      location.replace("/CryptoPay/?" + pathname + location.search + location.hash);
+    </script>
   </head>
   <body>
-    <p>Redirecting...</p>
+    <p>Redirecting to homepage...</p>
   </body>
 </html>
+
 
