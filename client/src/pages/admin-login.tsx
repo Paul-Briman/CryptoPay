@@ -1,5 +1,4 @@
 import { useLocation } from "wouter";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLogin } from "../lib/auth";
@@ -12,11 +11,12 @@ import { useToast } from "../hooks/use-toast";
 import { Bitcoin, Shield } from "lucide-react";
 import { Link } from "wouter";
 import type { LoginData } from "@shared/schema";
+import { useEffect } from "react";
 
 export function AdminLogin() {
   const { toast } = useToast();
   const login = useLogin();
-  const [, setLocation] = useLocation(); // ✅ useLocation for route change
+  const [, setLocation] = useLocation();
 
   const form = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
@@ -26,6 +26,15 @@ export function AdminLogin() {
     },
   });
 
+  useEffect(() => {
+    if (login.isSuccess) {
+      form.reset({
+        email: "",
+        password: "",
+      });
+    }
+  }, [login.isSuccess, form]);
+
   const handleLogin = (data: LoginData) => {
     login.mutate(data, {
       onSuccess: (user) => {
@@ -34,7 +43,12 @@ export function AdminLogin() {
             title: "Welcome, Admin!",
             description: "You have been successfully logged in to the admin panel.",
           });
-          setLocation("/admin"); // ✅ client-side navigation
+
+          // Wait for reset to complete before navigating
+          setTimeout(() => {
+            form.reset(); // Just in case
+            setLocation("/admin");
+          }, 300);
         } else {
           toast({
             title: "Access Denied",
@@ -68,7 +82,11 @@ export function AdminLogin() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-4">
+            <form
+              onSubmit={form.handleSubmit(handleLogin)}
+              autoComplete="off"
+              className="space-y-4"
+            >
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-300">
                   Username/Email
@@ -76,6 +94,7 @@ export function AdminLogin() {
                 <Input
                   id="email"
                   type="text"
+                  autoComplete="off"
                   {...form.register("email")}
                   className="crypto-bg-black border-gray-600 text-white focus:crypto-border-gold"
                   placeholder="Enter admin username or email"
@@ -94,6 +113,7 @@ export function AdminLogin() {
                 <Input
                   id="password"
                   type="password"
+                  autoComplete="new-password"
                   {...form.register("password")}
                   className="crypto-bg-black border-gray-600 text-white focus:crypto-border-gold"
                   placeholder="Enter admin password"
@@ -125,3 +145,6 @@ export function AdminLogin() {
     </div>
   );
 }
+
+
+

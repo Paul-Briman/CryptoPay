@@ -51,6 +51,7 @@ export function ForgotPasswordModal({
   const {
     register: registerOtp,
     handleSubmit: handleOtpSubmit,
+    reset: resetOtpForm,
     formState: { errors: otpErrors },
   } = useForm<OtpForm>({ resolver: zodResolver(otpSchema) });
 
@@ -59,6 +60,17 @@ export function ForgotPasswordModal({
       otpInputRef.current.focus();
     }
   }, [step]);
+
+  useEffect(() => {
+    if (!open) {
+      resetEmailForm();
+      resetOtpForm();
+      setStep("email");
+      setEmail("");
+      setMessage("");
+      setError("");
+    }
+  }, [open, resetEmailForm, resetOtpForm]);
 
   const sendOtp = async ({ email }: EmailForm) => {
     setLoading(true);
@@ -115,14 +127,20 @@ export function ForgotPasswordModal({
         </DialogHeader>
 
         {step === "email" ? (
-          <form onSubmit={handleEmailSubmit(sendOtp)} className="space-y-4">
+          <form
+            onSubmit={handleEmailSubmit(sendOtp)}
+            autoComplete="new-password"
+            className="space-y-4"
+          >
             <Input
               placeholder="Enter your email"
               {...registerEmail("email")}
               className="w-full bg-gray-900 text-white border border-gray-700 focus:border-[#FFD700]"
             />
             {emailErrors.email && (
-              <p className="text-sm text-red-500">{emailErrors.email.message}</p>
+              <p className="text-sm text-red-500">
+                {emailErrors.email.message}
+              </p>
             )}
 
             <Button
@@ -139,6 +157,7 @@ export function ForgotPasswordModal({
           </form>
         ) : (
           <form
+            autoComplete="new-password"
             onSubmit={handleOtpSubmit(verifyOtpAndReset)}
             className="space-y-4"
           >
@@ -147,7 +166,7 @@ export function ForgotPasswordModal({
               {...registerOtp("otp")}
               ref={(el) => {
                 otpInputRef.current = el;
-                // @ts-ignore: suppress TS warning
+                // @ts-ignore
                 registerOtp("otp").ref?.(el);
               }}
               className="w-full bg-gray-900 text-white border border-gray-700 focus:border-[#FFD700]"
@@ -159,6 +178,7 @@ export function ForgotPasswordModal({
             <Input
               type="password"
               placeholder="New password"
+              autoComplete="off"
               {...registerOtp("newPassword")}
               className="w-full bg-gray-900 text-white border border-gray-700 focus:border-[#FFD700]"
             />
@@ -192,9 +212,4 @@ export function ForgotPasswordModal({
     </Dialog>
   );
 }
-
-
-
-
-
 

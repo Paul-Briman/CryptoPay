@@ -36,17 +36,6 @@ export function Navbar({ onLoginClick, onSignupClick }: NavbarProps) {
     setIsMobileMenuOpen(false);
   };
 
-  const handleTermsClick = () => {
-    if (location === "/terms") {
-      // Force re-navigate to same route
-      setLocation("/"); // Go elsewhere
-      requestAnimationFrame(() => setLocation("/terms")); // Then return
-    } else {
-      setLocation("/terms");
-    }
-    setIsMobileMenuOpen(false);
-  };
-
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
@@ -88,12 +77,6 @@ export function Navbar({ onLoginClick, onSignupClick }: NavbarProps) {
                 {item.label}
               </button>
             ))}
-            <button
-              onClick={handleTermsClick}
-              className="px-3 py-2 text-sm font-medium text-gray-300 hover:crypto-text-gold"
-            >
-              Terms
-            </button>
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
@@ -160,12 +143,6 @@ export function Navbar({ onLoginClick, onSignupClick }: NavbarProps) {
               {item.label}
             </button>
           ))}
-          <button
-            onClick={handleTermsClick}
-            className="block w-full text-left px-3 py-2 text-base font-medium text-gray-300 hover:crypto-text-gold"
-          >
-            Terms
-          </button>
 
           <hr className="border-gray-600 my-2" />
 
@@ -216,6 +193,7 @@ export function Navbar({ onLoginClick, onSignupClick }: NavbarProps) {
     </nav>
   );
 }
+
 
 
 

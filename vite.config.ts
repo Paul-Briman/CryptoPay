@@ -1,48 +1,39 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
-import { viteSingleFile } from 'vite-plugin-singlefile';
+import { fileURLToPath } from "url";
 
-// Use async function to handle await
-export default (async () => {
-  const cartographerPlugin =
-    process.env.NODE_ENV !== "production" && process.env.REPL_ID !== undefined
-      ? [(await import("@replit/vite-plugin-cartographer")).cartographer()]
-      : [];
+// Polyfill __dirname for ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-  return defineConfig({
-    base: "/CryptoPay/",
-
-    plugins: [react(), viteSingleFile(), runtimeErrorOverlay(), ...cartographerPlugin],
-
-    resolve: {
-      alias: {
-        "@": path.resolve(import.meta.dirname, "client", "src"),
-        "@shared": path.resolve(import.meta.dirname, "shared"),
-        "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+export default defineConfig({
+  base: process.env.NODE_ENV === "production" ? "/CryptoPay/" : "/",
+  root: path.resolve(__dirname, "client"), // This tells Vite where to find your frontend
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "client", "src"),
+      "@shared": path.resolve(__dirname, "shared"),
+    },
+  },
+  server: {
+    port: 5173, // Ensure Vite uses this port
+    proxy: {
+      "/api": {
+        target: "http://localhost:3000", // Backend server
+        changeOrigin: true,
+        secure: false,
       },
     },
+  },
+  build: {
+    outDir: path.resolve(__dirname, "dist", "client"), // match server static folder
+    emptyOutDir: true,
+  },
+});
 
-    root: path.resolve(import.meta.dirname, "client"),
 
-    build: {
-      outDir: path.resolve(import.meta.dirname, "dist/client"),
-      emptyOutDir: true,
-    },
 
-    server: {
-      fs: {
-        strict: true,
-        deny: ["**/.*"],
-      },
-      proxy: {
-        "/api": {
-          target: "http://localhost:3000",
-          changeOrigin: true,
-          secure: false,
-        },
-      },
-    },
-  });
-})();
+
+

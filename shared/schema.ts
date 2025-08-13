@@ -27,7 +27,7 @@ export const users = mysqlTable("users", {
 
 export const userPlans = mysqlTable("user_plans", {
   id: int("id").primaryKey().autoincrement(),
-  userId: int("user_id").notNull().references(() => users.id),
+  userId: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   planType: varchar("plan_type", { length: 255 }).notNull(),
   investmentAmount: int("investment_amount").notNull(),
   expectedReturn: int("expected_return").notNull(),

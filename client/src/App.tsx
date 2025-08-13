@@ -44,7 +44,7 @@ return (
       />
     )}
 
-      <WouterRouter base="/CryptoPay">
+      <WouterRouter base={import.meta.env.BASE_URL}>
         <Switch>
           <Route
             path="/"

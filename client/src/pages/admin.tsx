@@ -2,7 +2,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../lib/auth";
 import { apiRequest } from "../lib/queryClient";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { useToast } from "../hooks/use-toast";
 import { Home } from "lucide-react";
@@ -35,21 +40,26 @@ export function Admin() {
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 5;
 
-  const { data: users = [], isLoading: loadingUsers } = useQuery<UserWithPlan[]>({
-  queryKey: ["/api/admin/users"],
-  queryFn: async () => {
-    const res = await apiRequest("GET", "/api/admin/users");
-    return res.json();
-  },
-  enabled: !!user?.isAdmin,
-});
-
+  const { data: users = [], isLoading: loadingUsers } = useQuery<
+    UserWithPlan[]
+  >({
+    queryKey: ["/api/admin/users"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/admin/users");
+      return res.json();
+    },
+    enabled: !!user?.isAdmin,
+  });
 
   const activatePlan = useMutation({
     mutationFn: async (planId: number) => {
-      const response = await apiRequest("PATCH", `/api/admin/plans/${planId}/status`, {
-        status: "active",
-      });
+      const response = await apiRequest(
+        "PATCH",
+        `/api/admin/plans/${planId}/status`,
+        {
+          status: "active",
+        }
+      );
       return response.json();
     },
     onSuccess: () => {
@@ -69,41 +79,45 @@ export function Admin() {
   });
 
   const completePlan = useMutation({
-  mutationFn: async (planId: number) => {
-    const res = await apiRequest("PATCH", `/api/admin/complete-plan/${planId}`);
-    if (!res.ok) throw new Error("Failed to complete plan");
-  },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
-    toast({
-      title: "Plan completed",
-      description: "The plan has been marked as completed.",
-    });
-  },
-  onError: () => {
-    toast({
-      title: "Error",
-      description: "Failed to complete plan.",
-      variant: "destructive",
-    });
-  },
-});
-
-
-
-
-  const deleteUser = useMutation({
-    mutationFn: async (id: number) => {
-      const res = await apiRequest("DELETE", `/api/admin/users/${id}`);
-      if (!res.ok) throw new Error("Failed to delete user");
+    mutationFn: async (planId: number) => {
+      const res = await apiRequest(
+        "PATCH",
+        `/api/admin/complete-plan/${planId}`
+      );
+      if (!res.ok) throw new Error("Failed to complete plan");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: "Plan completed",
+        description: "The plan has been marked as completed.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to complete plan.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteUser = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest("DELETE", `/api/admin/user/${id}`);
+      if (!res.ok) throw new Error("Failed to delete user");
+    },
+    onSuccess: (_, deletedUserId) => {
+      queryClient.setQueryData<UserWithPlan[]>(
+        ["/api/admin/user"],
+        (oldUsers = []) => oldUsers.filter((u) => u.id !== deletedUserId)
+      );
       toast({
         title: "User deleted",
         description: "The user account has been removed.",
       });
     },
+
     onError: () => {
       toast({
         title: "Error",
@@ -145,26 +159,28 @@ export function Admin() {
 
   const filteredUsers = useMemo(() => {
     return users
-      .filter((u) =>
-        u.name.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase())
+      .filter(
+        (u) =>
+          u.name.toLowerCase().includes(search.toLowerCase()) ||
+          u.email.toLowerCase().includes(search.toLowerCase())
       )
-      .filter((u) =>
-        statusFilter === "all" || (u.plan?.status === statusFilter)
-      )
-      .filter((u) =>
-        planFilter === "all" || (u.plan?.planType === planFilter)
-      )
+      .filter((u) => statusFilter === "all" || u.plan?.status === statusFilter)
+      .filter((u) => planFilter === "all" || u.plan?.planType === planFilter)
       .sort((a, b) => {
         if (sortBy === "amount") {
-          return (b.plan?.investmentAmount || 0) - (a.plan?.investmentAmount || 0);
+          return (
+            (b.plan?.investmentAmount || 0) - (a.plan?.investmentAmount || 0)
+          );
         }
         return a.name.localeCompare(b.name);
       });
   }, [users, search, statusFilter, planFilter, sortBy]);
 
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-  const currentUsers = filteredUsers.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+  const currentUsers = filteredUsers.slice(
+    (currentPage - 1) * usersPerPage,
+    currentPage * usersPerPage
+  );
 
   if (!user) {
     window.location.href = "/admin-login";
@@ -177,8 +193,13 @@ export function Admin() {
         <Card className="crypto-bg-gray border-gray-600 max-w-md">
           <CardContent className="p-6 text-center">
             <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
-            <p className="text-gray-300 mb-4">You don't have permission to access this page.</p>
-            <Button onClick={() => window.location.href = "/"} className="crypto-bg-gold text-black">
+            <p className="text-gray-300 mb-4">
+              You don't have permission to access this page.
+            </p>
+            <Button
+              onClick={() => (window.location.href = "/")}
+              className="crypto-bg-gold text-black"
+            >
               <Home className="h-4 w-4 mr-2" /> Go Home
             </Button>
           </CardContent>
@@ -195,7 +216,9 @@ export function Admin() {
             <h1 className="text-3xl font-bold crypto-text-gold">Admin Panel</h1>
             <p className="text-gray-300">Manage users and investment plans</p>
           </div>
-          <Button onClick={handleExport} className="crypto-bg-gold text-black">Export CSV</Button>
+          <Button onClick={handleExport} className="crypto-bg-gold text-black">
+            Export CSV
+          </Button>
         </div>
 
         <div className="mb-4 flex flex-wrap gap-4">
@@ -243,20 +266,36 @@ export function Admin() {
           </CardHeader>
           <CardContent>
             {loadingUsers ? (
-              <div className="text-center py-8 text-gray-300">Loading users...</div>
+              <div className="text-center py-8 text-gray-300">
+                Loading users...
+              </div>
             ) : filteredUsers.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">No users found.</div>
+              <div className="text-center py-8 text-gray-400">
+                No users found.
+              </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-600">
-                      <th className="text-left py-3 px-4 text-gray-300">User</th>
-                      <th className="text-left py-3 px-4 text-gray-300">Email</th>
-                      <th className="text-left py-3 px-4 text-gray-300">Plan</th>
-                      <th className="text-left py-3 px-4 text-gray-300">Amount</th>
-                      <th className="text-left py-3 px-4 text-gray-300">Status</th>
-                      <th className="text-left py-3 px-4 text-gray-300">Actions</th>
+                      <th className="text-left py-3 px-4 text-gray-300">
+                        User
+                      </th>
+                      <th className="text-left py-3 px-4 text-gray-300">
+                        Email
+                      </th>
+                      <th className="text-left py-3 px-4 text-gray-300">
+                        Plan
+                      </th>
+                      <th className="text-left py-3 px-4 text-gray-300">
+                        Amount
+                      </th>
+                      <th className="text-left py-3 px-4 text-gray-300">
+                        Status
+                      </th>
+                      <th className="text-left py-3 px-4 text-gray-300">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -265,15 +304,23 @@ export function Admin() {
                         <td className="py-3 px-4 text-white">{user.name}</td>
                         <td className="py-3 px-4 text-white">{user.email}</td>
                         <td className="py-3 px-4 text-white">
-                          {user.plan ? plans[user.plan.planType as keyof typeof plans] : "No plan"}
+                          {user.plan
+                            ? plans[user.plan.planType as keyof typeof plans]
+                            : "No plan"}
                         </td>
                         <td className="py-3 px-4 text-white">
-                          {user.plan ? `$${user.plan.investmentAmount.toLocaleString()}` : "-"}
+                          {user.plan
+                            ? `$${user.plan.investmentAmount.toLocaleString()}`
+                            : "-"}
                         </td>
                         <td className="py-3 px-4">
                           {user.plan ? (
                             <Badge
-                              variant={user.plan.status === "active" ? "default" : "secondary"}
+                              variant={
+                                user.plan.status === "active"
+                                  ? "default"
+                                  : "secondary"
+                              }
                               className={
                                 user.plan.status === "active"
                                   ? "bg-green-600 text-white"
@@ -292,22 +339,30 @@ export function Admin() {
                           <div className="flex gap-2 flex-wrap">
                             {user.plan?.status === "pending" && (
                               <Button
-                                onClick={() => activatePlan.mutate(user.plan!.id)}
+                                onClick={() =>
+                                  activatePlan.mutate(user.plan!.id)
+                                }
                                 disabled={activatePlan.isPending}
                                 size="sm"
                                 className="crypto-bg-gold text-black hover:bg-yellow-400"
                               >
-                                {activatePlan.isPending ? "Activating..." : "Activate"}
+                                {activatePlan.isPending
+                                  ? "Activating..."
+                                  : "Activate"}
                               </Button>
                             )}
                             {user.plan?.status === "active" && (
                               <Button
-                                onClick={() => completePlan.mutate(user.plan!.id)}
+                                onClick={() =>
+                                  completePlan.mutate(user.plan!.id)
+                                }
                                 disabled={completePlan.isPending}
                                 size="sm"
                                 className="bg-blue-600 hover:bg-blue-700 text-white"
                               >
-                                {completePlan.isPending ? "Completing..." : "Mark as Completed"}
+                                {completePlan.isPending
+                                  ? "Completing..."
+                                  : "Mark as Completed"}
                               </Button>
                             )}
                             {!user.isAdmin && (
@@ -331,19 +386,21 @@ export function Admin() {
 
             {totalPages > 1 && (
               <div className="mt-4 flex justify-center gap-2">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1 rounded ${
-                      currentPage === page
-                        ? "crypto-bg-gold text-black"
-                        : "bg-gray-700 text-white hover:bg-gray-600"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1 rounded ${
+                        currentPage === page
+                          ? "crypto-bg-gold text-black"
+                          : "bg-gray-700 text-white hover:bg-gray-600"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
               </div>
             )}
           </CardContent>
@@ -352,9 +409,3 @@ export function Admin() {
     </div>
   );
 }
-
-
-
-
-
-

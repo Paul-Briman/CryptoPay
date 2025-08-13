@@ -1,25 +1,22 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import session from "express-session";
 import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import type { Request, Response, NextFunction } from "express";
+import http from "http"; // ✅ Add this
 
 const app = express();
 
-// ✅ CORS for frontend on Vite (adjust port if needed)
 app.use(
   cors({
-    origin: "http://localhost:5173", // frontend dev server
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
 
-// ✅ Body parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// ✅ Session middleware
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "super-secret",
@@ -27,40 +24,41 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // Set to true in production
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+      secure: false,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   })
 );
 
-// ✅ Optional: log API responses
 app.use((req, res, next) => {
   const start = Date.now();
-  let capturedResponse: any;
-  const origJson = res.json;
+  let responseBody: any;
+  const originalJson = res.json;
   res.json = function (body, ...args) {
-    capturedResponse = body;
-    return origJson.call(this, body, ...args);
+    responseBody = body;
+    return originalJson.call(this, body, ...args);
   };
 
   res.on("finish", () => {
     if (req.path.startsWith("/api")) {
-      const time = Date.now() - start;
-      let logLine = `${req.method} ${req.path} ${res.statusCode} - ${time}ms`;
-      if (capturedResponse) {
-        logLine += ` :: ${JSON.stringify(capturedResponse)}`;
+      const duration = Date.now() - start;
+      let logMessage = `${req.method} ${req.path} ${res.statusCode} - ${duration}ms`;
+      if (responseBody) {
+        logMessage += ` :: ${JSON.stringify(responseBody)}`;
       }
-      log(logLine);
+      log(logMessage);
     }
   });
 
   next();
 });
 
-// ✅ Register API routes
 (async () => {
   try {
-    const server = await registerRoutes(app);
+    await registerRoutes(app);
+
+    // ✅ Create the HTTP server manually
+    const server = http.createServer(app);
 
     // ✅ Error handler
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -68,12 +66,10 @@ app.use((req, res, next) => {
       res.status(err.status || 500).json({ message: err.message || "Server error" });
     });
 
-    // ✅ Serve frontend only in production
     if (process.env.NODE_ENV === "production") {
       serveStatic(app);
     } else {
-      // You can skip this entirely if Vite is running separately on port 5173
-      await setupVite(app, server); 
+      await setupVite(app, server); // ✅ properly inject Vite middleware
     }
 
     const port = parseInt(process.env.PORT || "3000", 10);
@@ -84,5 +80,7 @@ app.use((req, res, next) => {
     console.error("❌ Server startup error:", err);
   }
 })();
+
+
 
 

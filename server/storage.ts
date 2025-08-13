@@ -94,10 +94,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteUser(userId: number): Promise<boolean> {
+    const [existingUser] = await db.select().from(users).where(eq(users.id, userId));
+    if (!existingUser) return false;
+
     await db.delete(userPlans).where(eq(userPlans.userId, userId));
     await db.delete(users).where(eq(users.id, userId));
-    const [user] = await db.select().from(users).where(eq(users.id, userId));
-    return !user;
+
+    const [deletedCheck] = await db.select().from(users).where(eq(users.id, userId));
+    return !deletedCheck;
   }
 
   async getUserPlan(userId: number): Promise<UserPlan | undefined> {
@@ -121,11 +125,40 @@ export class DatabaseStorage implements IStorage {
   async updateUserPlanStatus(id: number, status: string): Promise<UserPlan | undefined> {
     await db.update(userPlans).set({ status }).where(eq(userPlans.id, id));
     const [updated] = await db.select().from(userPlans).where(eq(userPlans.id, id));
+
+    // ✅ CREDIT WALLET WITH INVESTMENT AMOUNT IF STATUS SET TO "active"
+    if (updated && status === "active") {
+      const currentBalance = await this.getWallet(updated.userId);
+      const newBalance = (currentBalance ?? 0) + updated.investmentAmount;
+      await this.updateWalletBalance(updated.userId, newBalance);
+    }
+
     return updated;
   }
 
   async activateUserPlan(planId: number): Promise<UserPlan | undefined> {
+    const [plan] = await db.select().from(userPlans).where(eq(userPlans.id, planId));
+    if (!plan || plan.status === "active") {
+      console.log("Plan not found or already active.");
+      return undefined;
+    }
+
     await db.update(userPlans).set({ status: "active" }).where(eq(userPlans.id, planId));
+    console.log(`Plan ${planId} activated.`);
+
+    const currentBalance = await this.getWallet(plan.userId);
+    console.log(`Current wallet balance for user ${plan.userId}: ₦${currentBalance}`);
+
+    const newBalance = currentBalance + plan.investmentAmount;
+    console.log(`New balance should be: ₦${newBalance}`);
+
+    const walletUpdated = await this.updateWalletBalance(plan.userId, newBalance);
+    if (!walletUpdated) {
+      console.error("⚠️ Wallet update failed.");
+    } else {
+      console.log(`✅ Wallet updated for user ${plan.userId}: ₦${newBalance}`);
+    }
+
     const [updated] = await db.select().from(userPlans).where(eq(userPlans.id, planId));
     return updated;
   }
@@ -154,20 +187,19 @@ export class DatabaseStorage implements IStorage {
     return plans;
   }
 
- async getWallet(userId: number): Promise<number> {
-  const [user] = await db
-    .select({ walletBalance: users.walletBalance })
-    .from(users)
-    .where(eq(users.id, userId));
+  async getWallet(userId: number): Promise<number> {
+    const [user] = await db
+      .select({ walletBalance: users.walletBalance })
+      .from(users)
+      .where(eq(users.id, userId));
 
-  return user ? parseFloat(user.walletBalance) : 0;
-}
-
+    return user ? parseFloat(user.walletBalance) : 0;
+  }
 
   async updateWalletBalance(userId: number, newBalance: number): Promise<boolean> {
     const result = await db
       .update(users)
-      .set({ walletBalance: newBalance.toString() }) // ✅ fixed snake_case
+      .set({ walletBalance: newBalance.toString() })
       .where(eq(users.id, userId))
       .execute();
 
@@ -210,5 +242,6 @@ export class DatabaseStorage implements IStorage {
 }
 
 export const storage = new DatabaseStorage();
+
 
 

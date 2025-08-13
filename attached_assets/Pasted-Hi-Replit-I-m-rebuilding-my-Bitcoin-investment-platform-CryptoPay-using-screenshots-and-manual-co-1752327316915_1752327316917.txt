@@ -1,0 +1,62 @@
+Hi Replit, I’m rebuilding my Bitcoin investment platform “CryptoPay” using screenshots and manual content uploads.
+
+🔧 REQUIREMENTS:
+
+✅ Use these technologies:
+- React (with JSX)
+- Tailwind CSS for styling
+- Vite as the build tool
+- Any backend (Node.js + Express, etc.) — **as long as it works in VS Code locally and I can edit it later**
+
+🌐 SITE STRUCTURE (Must Match Screenshot Design):
+- Navbar with: Home | Plans | About | Contact | Signup | Login
+- Black and Yellow theme (clean and professional)
+- “CryptoPay” logo should appear on all screens
+- Fully responsive: Navbar must work on mobile with toggle menu
+- Add hover effect to navbar links and highlight active page
+
+📝 AUTHENTICATION:
+- Functional **Signup & Login Forms**
+   - Fields: Full Name, Email, Password
+   - After signup/login: redirect to **User Dashboard**
+   - Use sessions or cookies, not localStorage (I’ll change the backend later)
+
+💼 USER DASHBOARD FUNCTIONALITY:
+- After login, users should see 4 plans:
+   - Basic Plan: $500 → $2,000 (4× ROI)
+   - Gold Plan: $1,000 → $6,500 (6.5× ROI)
+   - Platinum Plan: $2,000 → $15,000 (7.5× ROI)
+   - Diamond Plan: $5,000 → $50,000 (10× ROI)
+- Plan selection logic:
+   - When a plan is selected, display **BTC wallet address**:
+     `bc1qxq5vg8pqvu22897a4s5vk0as4dlske0j6mw5f8`
+   - Save selection with status **"pending"**
+   - BTC wallet should be **visible until status = "active"**
+   - Copy button for BTC wallet is required
+
+🛠️ ADMIN PANEL (accessible via /admin):
+- View all registered users
+- See selected plans and current status (pending/active)
+- Click button to **mark plan as active**
+- Once active, the user’s wallet address disappears from dashboard
+
+💬 SUPPORT CHAT:
+- Show floating **“Support Chat”** button (bottom-right)
+- On click, redirect to WhatsApp:
+  `https://wa.me/18653565182`
+- Do **not** call it “WhatsApp chat” — keep it clean and professional
+
+📈 LIVE DATA:
+- Display a live Bitcoin price chart on the homepage (CoinGecko or similar)
+- Show a **live payout ticker** like:
+  “John from Canada just got paid $6,500 — 2 hours ago”
+  - Randomize names, countries, and payout times
+
+🧰 DEVELOPER NOTES:
+- I’ll download the final ZIP and run it in VS Code
+- So please organize folders properly
+- No proprietary Replit database — use temporary session logic or in-memory store
+
+---
+
+This should be enough to generate a fully working prototype. Please implement all of this in one go. Don’t skip features.

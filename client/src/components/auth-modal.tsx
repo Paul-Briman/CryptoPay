@@ -1,3 +1,4 @@
+// ✅ Full AuthModal with autofill prevention
 import { useEffect, useState } from "react";
 import { ForgotPasswordModal } from "./forgot-password-modal";
 
@@ -56,8 +57,6 @@ const phonePrefixes = [
   { code: "+263", label: "Zimbabwe" },
 ];
 
-
-
 export function AuthModal({
   isOpen,
   onClose,
@@ -66,7 +65,6 @@ export function AuthModal({
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
-
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const { toast } = useToast();
@@ -108,6 +106,7 @@ export function AuthModal({
         setLocation(user.isAdmin ? "/admin" : "/dashboard");
         loginForm.reset();
         onClose();
+        setLocation("/dashboard");
       },
       onError: (err: any) => {
         toast({
@@ -119,34 +118,36 @@ export function AuthModal({
     });
   };
 
-  const handleSignup = (data: InsertUser) => {
-    if (!termsAccepted) {
+ const handleSignup = (data: InsertUser) => {
+  if (!termsAccepted) {
+    toast({
+      title: "Please accept Terms and Conditions",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  register.mutate(data, {
+    onSuccess: () => {
       toast({
-        title: "Please accept Terms and Conditions",
+        title: "Account created!",
+        description: "Welcome to CryptoPay.",
+      });
+      signupForm.reset();
+      setTermsAccepted(false);
+      onClose();
+      setLocation("/dashboard"); // ✅ Redirect user after successful signup
+    },
+    onError: (err: any) => {
+      toast({
+        title: "Signup failed",
+        description: err.message || "Registration failed",
         variant: "destructive",
       });
-      return;
-    }
+    },
+  });
+};
 
-    register.mutate(data, {
-      onSuccess: () => {
-        toast({
-          title: "Account created!",
-          description: "Welcome to CryptoPay.",
-        });
-        signupForm.reset();
-        onClose();
-        setTermsAccepted(false);
-      },
-      onError: (err: any) => {
-        toast({
-          title: "Signup failed",
-          description: err.message || "Registration failed",
-          variant: "destructive",
-        });
-      },
-    });
-  };
 
   const isSignupValid = () => {
     const values = signupForm.getValues();
@@ -168,11 +169,7 @@ export function AuthModal({
       onClick={() => setShowPassword(!showPassword)}
       className="text-sm text-gray-400 hover:text-white ml-2"
     >
-      {showPassword ? (
-        <EyeOff className="w-4 h-4" />
-      ) : (
-        <Eye className="w-4 h-4" />
-      )}
+      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
     </button>
   );
 
@@ -187,6 +184,8 @@ export function AuthModal({
 
         {mode === "login" ? (
           <form
+            key="login"
+            autoComplete="off"
             onSubmit={loginForm.handleSubmit(handleLogin)}
             className="space-y-4"
           >
@@ -197,6 +196,7 @@ export function AuthModal({
               <Input
                 id="email"
                 type="email"
+                autoComplete="new-password"
                 {...loginForm.register("email")}
                 className="crypto-bg-black text-white border-gray-600"
                 placeholder="you@example.com"
@@ -211,6 +211,7 @@ export function AuthModal({
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
                   {...loginForm.register("password")}
                   className="crypto-bg-black text-white border-gray-600"
                   placeholder="Enter your password"
@@ -245,6 +246,8 @@ export function AuthModal({
           </form>
         ) : (
           <form
+            key="signup"
+            autoComplete="off"
             onSubmit={signupForm.handleSubmit(handleSignup)}
             className="space-y-4"
           >
@@ -254,6 +257,7 @@ export function AuthModal({
               </Label>
               <Input
                 id="name"
+                autoComplete="new-password"
                 {...signupForm.register("name")}
                 className="crypto-bg-black text-white border-gray-600"
               />
@@ -266,6 +270,7 @@ export function AuthModal({
               <Input
                 id="email"
                 type="email"
+                autoComplete="new-password"
                 {...signupForm.register("email")}
                 className="crypto-bg-black text-white border-gray-600"
               />
@@ -295,6 +300,7 @@ export function AuthModal({
                 <Input
                   id="phone"
                   type="tel"
+                  autoComplete="new-password"
                   {...signupForm.register("phoneNumber")}
                   className="w-2/3 crypto-bg-black text-white border-gray-600"
                   placeholder="2125551234"
@@ -309,6 +315,7 @@ export function AuthModal({
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
                 {...signupForm.register("password")}
                 className="crypto-bg-black text-white border-gray-600"
               />
@@ -321,6 +328,7 @@ export function AuthModal({
               <Input
                 id="confirmPassword"
                 type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
                 {...signupForm.register("confirmPassword")}
                 className="crypto-bg-black text-white border-gray-600"
               />
@@ -369,3 +377,4 @@ export function AuthModal({
     </Dialog>
   );
 }
+

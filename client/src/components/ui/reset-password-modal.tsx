@@ -69,7 +69,7 @@ export default function ResetPasswordModal({
             {successMessage}
           </div>
         ) : (
-          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          <form className="space-y-4" autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
             <Input
               {...register("email")}
               placeholder="Email"
