@@ -3,13 +3,16 @@ import session from "express-session";
 import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import http from "http"; // ✅ Add this
+import http from "http";
 
 const app = express();
 
+// ✅ Use environment variable for frontend URL
+const FRONTEND_URL = process.env.VITE_API_BASE_URL || "http://localhost:5173";
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: FRONTEND_URL,
     credentials: true,
   })
 );
@@ -17,6 +20,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// ✅ Session config with secure cookies in production
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "super-secret",
@@ -24,12 +28,13 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     },
   })
 );
 
+// ✅ Logging middleware for API requests
 app.use((req, res, next) => {
   const start = Date.now();
   let responseBody: any;
@@ -57,21 +62,20 @@ app.use((req, res, next) => {
   try {
     await registerRoutes(app);
 
-    // ✅ Create the HTTP server manually
+    // ✅ Create HTTP server manually
     const server = http.createServer(app);
 
     // ✅ Error handler
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       console.error("❌ Error:", err.message);
-      res
-        .status(err.status || 500)
-        .json({ message: err.message || "Server error" });
+      res.status(err.status || 500).json({ message: err.message || "Server error" });
     });
 
+    // ✅ Serve frontend in production
     if (process.env.NODE_ENV === "production") {
       serveStatic(app);
     } else {
-      await setupVite(app, server); // ✅ properly inject Vite middleware
+      await setupVite(app, server);
     }
 
     const port = parseInt(process.env.PORT || "3000", 10);
@@ -82,3 +86,4 @@ app.use((req, res, next) => {
     console.error("❌ Server startup error:", err);
   }
 })();
+
