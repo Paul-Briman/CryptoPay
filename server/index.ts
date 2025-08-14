@@ -63,7 +63,9 @@ app.use((req, res, next) => {
     // ✅ Error handler
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       console.error("❌ Error:", err.message);
-      res.status(err.status || 500).json({ message: err.message || "Server error" });
+      res
+        .status(err.status || 500)
+        .json({ message: err.message || "Server error" });
     });
 
     if (process.env.NODE_ENV === "production") {
@@ -73,14 +75,10 @@ app.use((req, res, next) => {
     }
 
     const port = parseInt(process.env.PORT || "3000", 10);
-    server.listen(port, "127.0.0.1", () => {
-      log(`✅ Server running at http://127.0.0.1:${port}`);
+    server.listen(port, "0.0.0.0", () => {
+      log(`✅ Server running at http://0.0.0.0:${port}`);
     });
   } catch (err) {
     console.error("❌ Server startup error:", err);
   }
 })();
-
-
-
-
