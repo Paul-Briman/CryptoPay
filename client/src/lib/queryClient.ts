@@ -1,6 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
-// Helper to throw error if response is not OK
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -8,14 +7,13 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-// Base URL from environment variable
+// Use Vercel environment variable for API
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
-// General-purpose API request
 export async function apiRequest(
   method: string,
   url: string,
-  data?: unknown,
+  data?: unknown
 ): Promise<Response> {
   const res = await fetch(`${API_BASE_URL}${url}`, {
     method,
@@ -30,7 +28,6 @@ export async function apiRequest(
 
 type UnauthorizedBehavior = "returnNull" | "throw";
 
-// Query function wrapper
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
@@ -48,7 +45,6 @@ export const getQueryFn: <T>(options: {
     return await res.json();
   };
 
-// React Query Client
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -63,3 +59,4 @@ export const queryClient = new QueryClient({
     },
   },
 });
+

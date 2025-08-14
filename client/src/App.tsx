@@ -33,16 +33,14 @@ function Router() {
   // Normalize route to ignore base
   const normalizedPath = location.replace("/CryptoPay", "") || "/";
 
-  
-return (
-  <div className="min-h-screen crypto-bg-black">
-    {/* Hide Navbar on terms, faq, admin-login, and admin pages */}
-    {!["/terms", "/faq", "/admin-login", "/admin"].includes(normalizedPath) && (
-      <Navbar
-        onLoginClick={handleLoginClick}
-        onSignupClick={handleSignupClick}
-      />
-    )}
+  return (
+    <div className="min-h-screen crypto-bg-black">
+      {!["/terms", "/faq", "/admin-login", "/admin"].includes(normalizedPath) && (
+        <Navbar
+          onLoginClick={handleLoginClick}
+          onSignupClick={handleSignupClick}
+        />
+      )}
 
       <WouterRouter base={import.meta.env.BASE_URL}>
         <Switch>
@@ -87,5 +85,6 @@ function App() {
 }
 
 export default App;
+
 
 
