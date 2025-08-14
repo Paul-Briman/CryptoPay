@@ -58,7 +58,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     cors({
       origin:
         process.env.NODE_ENV === "production"
-          ? "https://your-frontend-url.com"
+          ? "https://crypto-pay-nu.vercel.app"
           : "http://127.0.0.1:5173",
       credentials: true,
     })
