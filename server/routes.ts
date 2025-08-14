@@ -56,10 +56,7 @@ const transporter = nodemailer.createTransport({
 export async function registerRoutes(app: Express): Promise<Server> {
   app.use(
     cors({
-      origin:
-        process.env.NODE_ENV === "production"
-          ? "https://crypto-pay-nu.vercel.app"
-          : "http://127.0.0.1:5173",
+       origin: "https://crypto-pay-nu.vercel.app",
       credentials: true,
     })
   );

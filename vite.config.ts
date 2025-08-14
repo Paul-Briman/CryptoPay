@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  base: process.env.NODE_ENV === "production" ? "/CryptoPay/" : "/",
+  base: process.env.NODE_ENV === "production" ? "/" : "/",
   root: path.resolve(__dirname, "client"), // This tells Vite where to find your frontend
   plugins: [react()],
   resolve: {
