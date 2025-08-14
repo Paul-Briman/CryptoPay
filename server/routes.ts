@@ -405,6 +405,12 @@ app.use(cors({
     res.json(allPlans);
   });
 
+  // Add this in routes.ts
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok", time: new Date() });
+});
+
+
   app.delete("/api/admin/user/:id", requireAdmin, async (req, res) => {
     console.log("Deleting user:", req.params.id);
     const userId = parseInt(req.params.id);
