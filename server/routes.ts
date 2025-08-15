@@ -9,16 +9,9 @@ import { storage } from "./storage";
 import {
   serverInsertUserSchema,
   loginSchema,
-  insertUserPlanSchema,
-  type InsertUserPlan,
-  userPlans,
 } from "@shared/schema";
-import crypto from "crypto";
 import bcrypt from "bcrypt";
-import { z } from "zod";
 import nodemailer from "nodemailer";
-import { db } from "./db";
-import { eq } from "drizzle-orm";
 
 // Extend express-session
 declare module "express-session" {
@@ -41,14 +34,15 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // CORS with preflight
+  // CORS
   const corsOptions = {
     origin: ["http://localhost:5173", "https://crypto-pay-nu.vercel.app"],
     credentials: true,
   };
   app.use(cors(corsOptions));
-  app.options("*", cors(corsOptions)); // preflight
+  app.options("*", cors(corsOptions));
 
+  // Auth middleware
   const requireAuth = (req: Request, res: Response, next: NextFunction) => {
     if (!req.session?.userId) return res.status(401).json({ message: "Unauthorized" });
     next();
@@ -66,11 +60,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
-  // Health check
+  // ✅ Health check routes
   app.get("/", (_req, res) => res.json({ status: "ok", time: new Date() }));
   app.get("/api/health", (_req, res) => res.json({ status: "ok", time: new Date() }));
 
-  // === Auth ===
+  // === Auth routes ===
   app.post("/api/auth/register", async (req, res) => {
     try {
       const parsed = serverInsertUserSchema.parse(req.body);
@@ -83,7 +77,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const welcomeHTML = `<div style="background:#0e0e0e;color:#f0f0f0;padding:30px;border-radius:12px;text-align:center;">
       <h1 style="color:#FFD700;">Welcome ${user.name}!</h1><p>Your journey with CryptoPay starts now.</p></div>`;
 
-      await transporter.sendMail({ from: '"CryptoPay" <no-reply@cryptopay.com>', to: user.email, subject: "Welcome!", html: welcomeHTML });
+      await transporter.sendMail({
+        from: '"CryptoPay" <no-reply@cryptopay.com>',
+        to: user.email,
+        subject: "Welcome!",
+        html: welcomeHTML,
+      });
 
       req.session.userId = user.id;
       req.session.user = { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin };
@@ -111,13 +110,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/auth/logout", (req, res) => {
-    req.session.destroy((err) => {
+    req.session.destroy(err => {
       if (err) return res.status(500).json({ message: "Could not log out" });
       res.json({ message: "Logged out successfully" });
     });
   });
 
-  // OTP routes
+  // OTP send route
   app.post("/api/auth/send-otp", async (req, res) => {
     try {
       const { email } = req.body;
@@ -133,7 +132,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const otp = generateOTP();
       otpStore.set(email, { code: otp, expiresAt: Date.now() + 10 * 60_000, lastSent: Date.now() });
 
-      await transporter.sendMail({ from: '"CryptoPay" <no-reply@cryptopay.com>', to: email, subject: "Your OTP Code", text: `Your OTP code is: ${otp}`, html: `<p>Your OTP code is: <b>${otp}</b></p>` });
+      await transporter.sendMail({
+        from: '"CryptoPay" <no-reply@cryptopay.com>',
+        to: email,
+        subject: "Your OTP Code",
+        text: `Your OTP code is: ${otp}`,
+        html: `<p>Your OTP code is: <b>${otp}</b></p>`,
+      });
       res.json({ message: "OTP sent" });
     } catch (err) {
       console.error(err);
@@ -141,8 +146,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add other user plan, admin, and wallet routes similarly with try/catch and requireAuth/requireAdmin
+  // === Future routes ===
+  // e.g., /api/plans, /api/admin, /api/wallet
+  // Make sure all return JSON and use requireAuth/requireAdmin as needed
 
   const httpServer = createServer(app);
   return httpServer;
 }
+
