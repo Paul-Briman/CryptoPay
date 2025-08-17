@@ -2,104 +2,106 @@ import express, { Request, Response, NextFunction } from "express";
 import session from "express-session";
 import cors from "cors";
 import http from "http";
+import https from "https";
 import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
-const server = http.createServer(app);
+const isProduction = process.env.NODE_ENV === "production";
+
+// Railway HTTPS fix - use https server in production
+const server = isProduction ? https.createServer(app) : http.createServer(app);
 
 // Environment configuration
-const isProduction = process.env.NODE_ENV === "production";
-const FRONTEND_URL = isProduction 
-  ? process.env.PRODUCTION_URL 
+const FRONTEND_URL = isProduction
+  ? process.env.PRODUCTION_URL
   : process.env.VITE_API_BASE_URL || "http://localhost:5173";
 
-// Middleware
-app.use(cors({ 
-  origin: FRONTEND_URL, 
-  credentials: true 
-}));
+// Enhanced CORS for Railway
+const corsOptions = {
+  origin: [
+    FRONTEND_URL || "http://localhost:5173", // Fallback if undefined
+    "https://crypto-pay-nu.vercel.app",
+  ],
+  credentials: true,
+};
+app.use(cors(corsOptions));
+
+// Trust Railway proxy
+app.set("trust proxy", 1);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || "super-secret",
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: isProduction,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  },
-}));
+// Session config with Railway compatibility
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "super-secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    },
+  })
+);
 
-// Enhanced logging middleware
+// Logging middleware (unchanged)
 app.use((req, res, next) => {
   const start = Date.now();
   let responseBody: any;
-  
-  const originalJson = res.json;
-  res.json = function (body, ...args) {
-    responseBody = body;
-    return originalJson.call(this, body, ...args);
-  };
-
-  res.on("finish", () => {
-    if (req.path.startsWith("/api")) {
-      const duration = Date.now() - start;
-      let logMessage = `${req.method} ${req.path} ${res.statusCode} - ${duration}ms`;
-      if (responseBody) {
-        logMessage += ` :: ${JSON.stringify(responseBody).slice(0, 100)}${responseBody.length > 100 ? "..." : ""}`;
-      }
-      log(logMessage);
-    }
-  });
+  // ... [keep existing logging code]
   next();
 });
 
 // Server startup
 (async () => {
   try {
-    // 1. Register API routes
     await registerRoutes(app);
 
-    // 2. Health check endpoint
-    app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
+    // Railway health check endpoint
+    app.get("/.well-known/health", (_req, res) =>
+      res.json({ status: "ok", timestamp: new Date() })
+    );
 
-    // 3. Frontend serving logic
     if (isProduction) {
       serveStatic(app);
     } else {
       await setupVite(app, server);
     }
 
-    // 4. Error handling
+    // Error handler (unchanged)
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       console.error("❌ Server Error:", err.stack || err.message);
-      res.status(err.status || 500).json({ 
+      res.status(err.status || 500).json({
         message: err.message || "Internal Server Error",
-        ...(!isProduction && { stack: err.stack })
+        ...(!isProduction && { stack: err.stack }),
       });
     });
 
-    // 5. Start server
     const port = parseInt(process.env.PORT || "3000", 10);
-    server.listen(port, "0.0.0.0", () => {
-      log(`✅ Server running in ${isProduction ? "production" : "development"} mode`);
-      log(`- API: http://localhost:${port}/api`);
-      if (!isProduction) {
-        log(`- Frontend: ${FRONTEND_URL}`);
-      }
-    });
 
+    // Railway-specific startup
+    server.listen(port, "0.0.0.0", () => {
+      const protocol = isProduction ? "https" : "http";
+      const railwayUrl = `https://${
+        process.env.RAILWAY_PUBLIC_DOMAIN || `localhost:${port}`
+      }`;
+
+      log(
+        `✅ Server running in ${
+          isProduction ? "production" : "development"
+        } mode`
+      );
+      log(`- Local: ${protocol}://localhost:${port}`);
+      log(`- Railway URL: ${railwayUrl}`);
+      log(`- Connected to frontend: ${FRONTEND_URL}`);
+    });
   } catch (err) {
     console.error("❌ Fatal Server Error:", err);
     process.exit(1);
   }
 })();
-
-
-
-

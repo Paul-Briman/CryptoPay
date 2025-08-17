@@ -6,10 +6,7 @@ dotenv.config();
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import {
-  serverInsertUserSchema,
-  loginSchema,
-} from "@shared/schema";
+import { serverInsertUserSchema, loginSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 
@@ -17,11 +14,20 @@ import nodemailer from "nodemailer";
 declare module "express-session" {
   interface SessionData {
     userId?: number;
-    user?: { id: number; name: string; email: string; isAdmin: boolean | null; role?: string };
+    user?: {
+      id: number;
+      name: string;
+      email: string;
+      isAdmin: boolean | null;
+      role?: string;
+    };
   }
 }
 
-const otpStore = new Map<string, { code: string; expiresAt: number; lastSent: number }>();
+const otpStore = new Map<
+  string,
+  { code: string; expiresAt: number; lastSent: number }
+>();
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -35,24 +41,41 @@ const transporter = nodemailer.createTransport({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // CORS
+  // Enhanced CORS configuration
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "https://crypto-pay-nu.vercel.app",
+    "https://crypto-pay-git-main-briman-pauls-projects.vercel.app",
+    "https://crypto-lppitu4fv-briman-pauls-projects.vercel.app",
+    process.env.PRODUCTION_URL, // Added for Railway
+  ].filter(Boolean) as string[]; // TypeScript safety
+
   const corsOptions = {
-    origin: ["http://localhost:5173", "https://crypto-pay-nu.vercel.app"],
+    origin: allowedOrigins,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   };
   app.use(cors(corsOptions));
   app.options("*", cors(corsOptions));
 
   // Auth middleware
   const requireAuth = (req: Request, res: Response, next: NextFunction) => {
-    if (!req.session?.userId) return res.status(401).json({ message: "Unauthorized" });
+    if (!req.session?.userId)
+      return res.status(401).json({ message: "Unauthorized" });
     next();
   };
 
-  const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.session?.userId) return res.status(401).json({ message: "Unauthorized" });
+  const requireAdmin = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    if (!req.session?.userId)
+      return res.status(401).json({ message: "Unauthorized" });
     try {
       const user = await storage.getUser(req.session.userId);
-      if (!user?.isAdmin) return res.status(403).json({ message: "Admin access required" });
+      if (!user?.isAdmin)
+        return res.status(403).json({ message: "Admin access required" });
       next();
     } catch (err) {
       console.error(err);
@@ -62,17 +85,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ✅ Health check routes
   app.get("/", (_req, res) => res.json({ status: "ok", time: new Date() }));
-  app.get("/api/health", (_req, res) => res.json({ status: "ok", time: new Date() }));
+  app.get("/api/health", (_req, res) =>
+    res.json({ status: "ok", time: new Date() })
+  );
 
   // === Auth routes ===
   app.post("/api/auth/register", async (req, res) => {
     try {
       const parsed = serverInsertUserSchema.parse(req.body);
       const existingUser = await storage.getUserByEmail(parsed.email);
-      if (existingUser) return res.status(400).json({ message: "User already exists" });
+      if (existingUser)
+        return res.status(400).json({ message: "User already exists" });
 
       const hashedPassword = await bcrypt.hash(parsed.password, 10);
-      const user = await storage.createUser({ ...parsed, password: hashedPassword });
+      const user = await storage.createUser({
+        ...parsed,
+        password: hashedPassword,
+      });
 
       const welcomeHTML = `<div style="background:#0e0e0e;color:#f0f0f0;padding:30px;border-radius:12px;text-align:center;">
       <h1 style="color:#FFD700;">Welcome ${user.name}!</h1><p>Your journey with CryptoPay starts now.</p></div>`;
@@ -85,7 +114,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       req.session.userId = user.id;
-      req.session.user = { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin };
+      req.session.user = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+      };
       res.json(req.session.user);
     } catch (error: any) {
       console.error("Registration error:", error);
@@ -102,7 +136,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
       req.session.userId = user.id;
-      req.session.user = { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, role: user.role };
+      req.session.user = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        role: user.role,
+      };
       res.json(req.session.user);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -110,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/auth/logout", (req, res) => {
-    req.session.destroy(err => {
+    req.session.destroy((err) => {
       if (err) return res.status(500).json({ message: "Could not log out" });
       res.json({ message: "Logged out successfully" });
     });
@@ -120,17 +160,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/send-otp", async (req, res) => {
     try {
       const { email } = req.body;
-      if (!email || typeof email !== "string") return res.status(400).json({ message: "Invalid email" });
+      if (!email || typeof email !== "string")
+        return res.status(400).json({ message: "Invalid email" });
 
       const user = await storage.getUserByEmail(email);
       if (!user) return res.status(404).json({ message: "User not found" });
 
       const existing = otpStore.get(email);
       if (existing && Date.now() - existing.lastSent < 60_000)
-        return res.status(429).json({ message: "Wait before requesting another OTP" });
+        return res
+          .status(429)
+          .json({ message: "Wait before requesting another OTP" });
 
       const otp = generateOTP();
-      otpStore.set(email, { code: otp, expiresAt: Date.now() + 10 * 60_000, lastSent: Date.now() });
+      otpStore.set(email, {
+        code: otp,
+        expiresAt: Date.now() + 10 * 60_000,
+        lastSent: Date.now(),
+      });
 
       await transporter.sendMail({
         from: '"CryptoPay" <no-reply@cryptopay.com>',
@@ -153,4 +200,3 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   return httpServer;
 }
-
