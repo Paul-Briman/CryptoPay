@@ -7,14 +7,15 @@
     "dev": "concurrently --kill-others-on-fail -n SERVER,CLIENT -c green,cyan \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "cross-env NODE_ENV=development node --import tsx/register server/index.ts",
     "dev:client": "cd client && vite",
-    "build": "npm-run-all build:client build:server",
+    "build": "cd client && vite build --emptyOutDir",
     "build:client": "cd client && vite build --emptyOutDir",
     "build:server": "cd server && tsx build src/index.ts --out-dir ../dist-server --format esm",
     "start": "node dist-server/index.js",
     "check": "tsc --noEmit",
     "db:push": "drizzle-kit push",
     "deploy": "npm run build && gh-pages -d dist/client",
-    "deploy:vercel": "cd client && npm install && vite build --emptyOutDir"
+    "deploy:vercel": "cd client && npm install && vite build --emptyOutDir",
+    "vercel-build": "cd client && vite build --emptyOutDir"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
