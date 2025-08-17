@@ -2,17 +2,17 @@
   "version": 2,
   "builds": [
     {
-      "src": "client/vite.config.ts",
+      "src": "package.json",  
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist"
+        "distDir": "client/dist"  
       }
     }
   ],
   "routes": [
     {
-      "src": "/(.*)",
-      "dest": "client/dist"
+      "src": "/(.*)", 
+      "dest": "client/dist/$1"
     }
   ]
 }
