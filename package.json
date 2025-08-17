@@ -5,15 +5,16 @@
   "license": "MIT",
   "scripts": {
     "dev": "concurrently --kill-others-on-fail -n SERVER,CLIENT -c green,cyan \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "cross-env NODE_ENV=development tsx watch server/index.ts",
+    "dev:server": "cross-env NODE_ENV=development node --import tsx/register server/index.ts",
     "dev:client": "cd client && vite",
-    "build": "cd client && vite build && cd .. && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
-    "start": "cross-env NODE_ENV=production node dist/index.js --loader:.ts=ts",
-    "postinstall": "npm run build",
-    "check": "tsc",
+    "build": "npm-run-all build:client build:server",
+    "build:client": "cd client && vite build --emptyOutDir",
+    "build:server": "cd server && tsx build src/index.ts --out-dir ../dist-server --format esm",
+    "start": "node dist-server/index.js",
+    "check": "tsc --noEmit",
     "db:push": "drizzle-kit push",
-    "predeploy": "cd client && vite build",
-    "deploy": "npm run build && gh-pages -d dist/client"
+    "deploy": "npm run build && gh-pages -d dist/client",
+    "deploy:vercel": "cd client && npm install && vite build --emptyOutDir"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -112,6 +113,7 @@
     "drizzle-kit": "^0.18.1",
     "esbuild": "^0.25.9",
     "gh-pages": "^6.3.0",
+    "npm-run-all": "^4.1.5",
     "postcss": "^8.5.6",
     "tailwindcss": "3.4",
     "ts-node": "^10.9.2",
