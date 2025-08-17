@@ -6,6 +6,7 @@ import https from "https";
 import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import stoppable from 'stoppable';
 
 const app = express();
 const isProduction = process.env.NODE_ENV === "production";
@@ -73,7 +74,7 @@ app.use((req, res, next) => {
       await setupVite(app, server);
     }
 
-    // Error handler (unchanged)
+    // Error handler (fixed missing parenthesis)
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       console.error("❌ Server Error:", err.stack || err.message);
       res.status(err.status || 500).json({
@@ -84,8 +85,8 @@ app.use((req, res, next) => {
 
     const port = parseInt(process.env.PORT || "3000", 10);
 
-    // Railway-specific startup
-    server.listen(port, "0.0.0.0", () => {
+    // Modified Railway startup with keep-alive
+    const stoppableServer = stoppable(server.listen(port, "0.0.0.0", () => {
       const protocol = isProduction ? "https" : "http";
       const railwayUrl = `https://${
         process.env.RAILWAY_PUBLIC_DOMAIN || `localhost:${port}`
@@ -99,6 +100,20 @@ app.use((req, res, next) => {
       log(`- Local: ${protocol}://localhost:${port}`);
       log(`- Railway URL: ${railwayUrl}`);
       log(`- Connected to frontend: ${FRONTEND_URL}`);
+
+      // Keep-alive heartbeat
+      setInterval(() => {
+        log(`❤️  Keep-alive ping ${new Date().toISOString()}`);
+      }, 10000);
+    }) );
+
+    // Graceful shutdown
+    process.on('SIGTERM', () => {
+      log('🛑 Received SIGTERM signal (Railway shutdown)');
+      stoppableServer.stop(() => {
+        log('🔌 Server stopped gracefully');
+        process.exit(0);
+      });
     });
   } catch (err) {
     console.error("❌ Fatal Server Error:", err);
