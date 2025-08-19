@@ -2,11 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "src": "package.json",  
+      "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
         "distDir": "dist/client",
-        "buildCommand": "npm run vercel-build"  
+        "buildCommand": "npm run vercel-build"
       }
     }
   ],
@@ -37,42 +37,28 @@
     },
     {
       "src": "/admin",
-      "dest": "/dist/client/index.html"
+      "dest": "/index.html"
     },
     {
       "src": "/admin-login",
-      "dest": "/dist/client/index.html"
+      "dest": "/index.html"
     },
     {
       "src": "/dashboard",
-      "dest": "/dist/client/index.html"
+      "dest": "/index.html"
     },
     {
+      "src": "/faq",
+      "dest": "/index.html"
+    },
+
+    {
       "src": "/terms",
-      "dest": "/dist/client/index.html"
+      "dest": "/index.html"
     },
     {
       "src": "/(.*)",
-      "dest": "/dist/client/$1"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "https://cryptopay-production-2311.up.railway.app"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, PUT, DELETE, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "X-Requested-With, Content-Type, Authorization"
-        }
-      ]
+      "dest": "/$1"
     }
   ]
 }
