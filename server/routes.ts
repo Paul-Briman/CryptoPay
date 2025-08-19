@@ -89,6 +89,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok", time: new Date() })
   );
 
+  // 🚨 Railway-Specific Health Check (Keep this exact path)
+  app.get("/.well-known/health", (_req, res) =>
+    res.json({
+      status: "ok",
+      timestamp: new Date(),
+      service: "cryptopay",
+      uptime: process.uptime(),
+    })
+  );
+
   // === Auth routes ===
   app.post("/api/auth/register", async (req, res) => {
     try {

@@ -6,7 +6,8 @@ import https from "https";
 import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import stoppable from 'stoppable';
+import stoppable from "stoppable";
+import type { StoppableServer } from "stoppable";
 
 const app = express();
 const isProduction = process.env.NODE_ENV === "production";
@@ -22,7 +23,7 @@ const FRONTEND_URL = isProduction
 // Enhanced CORS for Railway
 const corsOptions = {
   origin: [
-    FRONTEND_URL || "http://localhost:5173", // Fallback if undefined
+    FRONTEND_URL || "http://localhost:5173",
     "https://crypto-pay-nu.vercel.app",
   ],
   credentials: true,
@@ -35,7 +36,7 @@ app.set("trust proxy", 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Session config with Railway compatibility
+// Session config
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "super-secret",
@@ -54,19 +55,19 @@ app.use(
 app.use((req, res, next) => {
   const start = Date.now();
   let responseBody: any;
-  // ... [keep existing logging code]
   next();
 });
 
-// Server startup
+// Server startup - FREE TIER OPTIMIZED VERSION
 (async () => {
   try {
     await registerRoutes(app);
 
-    // Railway health check endpoint
-    app.get("/.well-known/health", (_req, res) =>
-      res.json({ status: "ok", timestamp: new Date() })
-    );
+    // Railway health check endpoint with enhanced logging
+    app.get("/.well-known/health", (_req, res) => {
+      console.log('❤️ [FREE-TIER-HEARTBEAT]', new Date().toISOString());
+      res.json({ status: "ok", timestamp: new Date() });
+    });
 
     if (isProduction) {
       serveStatic(app);
@@ -74,7 +75,7 @@ app.use((req, res, next) => {
       await setupVite(app, server);
     }
 
-    // Error handler (fixed missing parenthesis)
+    // Error handler
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       console.error("❌ Server Error:", err.stack || err.message);
       res.status(err.status || 500).json({
@@ -85,36 +86,30 @@ app.use((req, res, next) => {
 
     const port = parseInt(process.env.PORT || "3000", 10);
 
-    // Modified Railway startup with keep-alive
-    const stoppableServer = stoppable(server.listen(port, "0.0.0.0", () => {
-      const protocol = isProduction ? "https" : "http";
-      const railwayUrl = `https://${
-        process.env.RAILWAY_PUBLIC_DOMAIN || `localhost:${port}`
-      }`;
+    // ========== FREE TIER CRITICAL FIXES START ========== //
+    const stoppableServer: StoppableServer = stoppable(server);
 
-      log(
-        `✅ Server running in ${
-          isProduction ? "production" : "development"
-        } mode`
-      );
-      log(`- Local: ${protocol}://localhost:${port}`);
-      log(`- Railway URL: ${railwayUrl}`);
-      log(`- Connected to frontend: ${FRONTEND_URL}`);
+    // Railway Keep-Alive Hammer (7-second pulses for free tier)
+    const keepAlive = setInterval(() => {
+      console.log("🏓 [RAILWAY-FREE-KEEPALIVE]", new Date().toISOString());
+    }, 7000); // Changed to 7 seconds for free tier
 
-      // Keep-alive heartbeat
-      setInterval(() => {
-        log(`❤️  Keep-alive ping ${new Date().toISOString()}`);
-      }, 10000);
-    }) );
+    stoppableServer.listen(port, "0.0.0.0", () => {
+      console.log(`🚀 Server launched on port ${port}`);
+      console.log('🔧 Free Tier Mode: ACTIVE (7s keep-alive pulses)');
+      console.log(`🔗 Health: /.well-known/health`);
+    });
 
-    // Graceful shutdown
-    process.on('SIGTERM', () => {
-      log('🛑 Received SIGTERM signal (Railway shutdown)');
+    // Graceful shutdown with cleanup
+    process.on("SIGTERM", () => {
+      clearInterval(keepAlive);
+      console.log("🛑 Railway shutdown signal received");
       stoppableServer.stop(() => {
-        log('🔌 Server stopped gracefully');
+        console.log("🔌 Connections closed gracefully");
         process.exit(0);
       });
     });
+    // ========== FREE TIER CRITICAL FIXES END ========== //
   } catch (err) {
     console.error("❌ Fatal Server Error:", err);
     process.exit(1);

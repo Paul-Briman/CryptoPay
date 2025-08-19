@@ -534,9 +534,6 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
               <ul className="space-y-2">
                 <li className="text-gray-300">thecryptopayteam@gmail.com</li>
                 <li className="text-gray-300">+1 (865) 356-5182</li>
-                <li className="text-gray-300">
-                  123 Crypto Street, Digital City
-                </li>
               </ul>
             </div>
           </div>
