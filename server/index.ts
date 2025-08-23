@@ -15,20 +15,52 @@ const isProduction = process.env.NODE_ENV === "production";
 // Railway HTTPS fix - use https server in production
 const server = isProduction ? https.createServer(app) : http.createServer(app);
 
-// Environment configuration
-const FRONTEND_URL = isProduction
-  ? process.env.PRODUCTION_URL
-  : process.env.VITE_API_BASE_URL || "http://localhost:5173";
+// ========== COMPREHENSIVE CORS CONFIGURATION START ========== //
+const allowedOrigins = [
+  "http://localhost:5173", // Vite dev server
+  "http://localhost:3000", // Express server
+  "https://crypto-pay-nu.vercel.app", // Vercel frontend
+  "https://crypto-pay-git-main-briman-pauls-projects.vercel.app",
+  "https://crypto-lppitu4fv-briman-pauls-projects.vercel.app",
+  process.env.PRODUCTION_URL, // Railway backend
+].filter(Boolean) as string[];
 
-// Enhanced CORS for Railway
 const corsOptions = {
-  origin: [
-    FRONTEND_URL || "http://localhost:5173",
-    "https://crypto-pay-nu.vercel.app",
-  ],
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // Allow requests with no origin (like mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('🚫 Blocked by CORS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  exposedHeaders: ["set-cookie"]
 };
+
 app.use(cors(corsOptions));
+
+// Handle preflight requests globally
+app.options('*', cors(corsOptions));
+
+// Additional preflight handler for Express
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Origin', req.headers.origin || allowedOrigins[0]);
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Max-Age', '86400'); // 24 hours
+    return res.status(200).end();
+  }
+  next();
+});
+// ========== COMPREHENSIVE CORS CONFIGURATION END ========== //
 
 // Trust Railway proxy
 app.set("trust proxy", 1);
@@ -51,7 +83,7 @@ app.use(
   })
 );
 
-// Logging middleware (unchanged)
+// Logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   let responseBody: any;
@@ -92,12 +124,13 @@ app.use((req, res, next) => {
     // Railway Keep-Alive Hammer (7-second pulses for free tier)
     const keepAlive = setInterval(() => {
       console.log("🏓 [RAILWAY-FREE-KEEPALIVE]", new Date().toISOString());
-    }, 7000); // Changed to 7 seconds for free tier
+    }, 7000);
 
     stoppableServer.listen(port, "0.0.0.0", () => {
       console.log(`🚀 Server launched on port ${port}`);
       console.log('🔧 Free Tier Mode: ACTIVE (7s keep-alive pulses)');
       console.log(`🔗 Health: /.well-known/health`);
+      console.log(`🌐 Allowed Origins: ${allowedOrigins.join(', ')}`);
     });
 
     // Graceful shutdown with cleanup
