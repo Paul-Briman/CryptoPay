@@ -19,27 +19,34 @@ const isProduction = process.env.NODE_ENV === "production";
 app.use((req, res, next) => {
   const allowedOrigins = [
     "http://localhost:5173",
-    "http://localhost:3000", 
+    "http://localhost:3000",
     "https://crypto-pay-nu.vercel.app",
     "https://crypto-pay-git-main-briman-pauls-projects.vercel.app",
     "https://crypto-lppitu4fv-briman-pauls-projects.vercel.app",
+    "https://cryptopay-production-2311.up.railway.app",
     process.env.PRODUCTION_URL,
   ].filter(Boolean) as string[]; // Filter out undefined values
 
   const origin = req.headers.origin;
   if (origin && allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
+    res.header("Access-Control-Allow-Origin", origin);
   } else {
     // Allow all in development, specific in production
-    res.header('Access-Control-Allow-Origin', isProduction ? "https://crypto-pay-nu.vercel.app" : origin || '*');
+    res.header(
+      "Access-Control-Allow-Origin",
+      isProduction ? "https://crypto-pay-nu.vercel.app" : origin || "*"
+    );
   }
-  
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
+
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Requested-With"
+  );
+  res.header("Access-Control-Allow-Credentials", "true");
+
   // Handle preflight immediately
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
   next();
@@ -50,18 +57,21 @@ const productionOrigins = [
   "https://crypto-pay-nu.vercel.app",
   "https://crypto-pay-git-main-briman-pauls-projects.vercel.app",
   "https://crypto-lppitu4fv-briman-pauls-projects.vercel.app",
-  process.env.PRODUCTION_URL
+  "https://cryptopay-production-2311.up.railway.app",
+  process.env.PRODUCTION_URL,
 ].filter(Boolean) as string[]; // Explicitly cast to string[]
 
-app.use(cors({
-  origin: isProduction ? productionOrigins : true,
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-}));
+app.use(
+  cors({
+    origin: isProduction ? productionOrigins : true,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  })
+);
 
 // 3. Explicit preflight handler
-app.options('*', (req, res) => {
+app.options("*", (req, res) => {
   res.status(200).end();
 });
 // ========== END ATOMIC CORS FIX ========== //
@@ -102,9 +112,19 @@ app.use((req, res, next) => {
   try {
     await registerRoutes(app);
 
+    // Add this RIGHT AFTER await registerRoutes(app);
+    app.get("/", (_req, res) => {
+      res.json({
+        status: "ok",
+        service: "CryptoPay API",
+        timestamp: new Date(),
+        uptime: process.uptime(),
+      });
+    });
+
     // Railway health check endpoint with enhanced logging
     app.get("/.well-known/health", (_req, res) => {
-      console.log('❤️ [FREE-TIER-HEARTBEAT]', new Date().toISOString());
+      console.log("❤️ [FREE-TIER-HEARTBEAT]", new Date().toISOString());
       res.json({ status: "ok", timestamp: new Date() });
     });
 
@@ -135,7 +155,7 @@ app.use((req, res, next) => {
 
     stoppableServer.listen(port, "0.0.0.0", () => {
       console.log(`🚀 Server launched on port ${port}`);
-      console.log('🔧 Free Tier Mode: ACTIVE (7s keep-alive pulses)');
+      console.log("🔧 Free Tier Mode: ACTIVE (7s keep-alive pulses)");
       console.log(`🔗 Health: /.well-known/health`);
     });
 
