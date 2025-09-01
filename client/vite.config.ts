@@ -22,8 +22,7 @@ export default defineConfig({
       "/api": {
         target: process.env.VITE_API_BASE_URL || "http://localhost:3000",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
-        secure: process.env.NODE_ENV === "production" // Add this
+        secure: process.env.NODE_ENV === "production",
       },
     },
   },
@@ -41,6 +40,6 @@ export default defineConfig({
   },
   // Add this to your existing config
   css: {
-     postcss: path.resolve(__dirname, 'postcss.config.js'),
+    postcss: path.resolve(__dirname, "postcss.config.js"),
   },
 });

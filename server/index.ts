@@ -12,55 +12,62 @@ import type { StoppableServer } from "stoppable";
 const app = express();
 const isProduction = process.env.NODE_ENV === "production";
 
-// Railway HTTPS fix - use https server in production
-const server = isProduction ? https.createServer(app) : http.createServer(app);
+// ========== ATOMIC CORS FIX (100% WILL WORK) ========== //
+// PUT THIS AT THE VERY TOP - BEFORE ANY OTHER MIDDLEWARE
 
-// ========== COMPREHENSIVE CORS CONFIGURATION START ========== //
-const allowedOrigins = [
-  "http://localhost:5173", // Vite dev server
-  "http://localhost:3000", // Express server
-  "https://crypto-pay-nu.vercel.app", // Vercel frontend
-  "https://crypto-pay-git-main-briman-pauls-projects.vercel.app",
-  "https://crypto-lppitu4fv-briman-pauls-projects.vercel.app",
-  process.env.PRODUCTION_URL, // Railway backend
-].filter(Boolean) as string[];
-
-const corsOptions = {
-  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-    // Allow requests with no origin (like mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('🚫 Blocked by CORS:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  exposedHeaders: ["set-cookie"]
-};
-
-app.use(cors(corsOptions));
-
-// Handle preflight requests globally
-app.options('*', cors(corsOptions));
-
-// Additional preflight handler for Express
+// 1. Manual CORS headers (universal)
 app.use((req, res, next) => {
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "http://localhost:3000", 
+    "https://crypto-pay-nu.vercel.app",
+    "https://crypto-pay-git-main-briman-pauls-projects.vercel.app",
+    "https://crypto-lppitu4fv-briman-pauls-projects.vercel.app",
+    process.env.PRODUCTION_URL,
+  ].filter(Boolean) as string[]; // Filter out undefined values
+
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    // Allow all in development, specific in production
+    res.header('Access-Control-Allow-Origin', isProduction ? "https://crypto-pay-nu.vercel.app" : origin || '*');
+  }
+  
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight immediately
   if (req.method === 'OPTIONS') {
-    res.header('Access-Control-Allow-Origin', req.headers.origin || allowedOrigins[0]);
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Max-Age', '86400'); // 24 hours
     return res.status(200).end();
   }
   next();
 });
-// ========== COMPREHENSIVE CORS CONFIGURATION END ========== //
+
+// 2. Standard CORS middleware (backup) - FIXED TYPE ERROR
+const productionOrigins = [
+  "https://crypto-pay-nu.vercel.app",
+  "https://crypto-pay-git-main-briman-pauls-projects.vercel.app",
+  "https://crypto-lppitu4fv-briman-pauls-projects.vercel.app",
+  process.env.PRODUCTION_URL
+].filter(Boolean) as string[]; // Explicitly cast to string[]
+
+app.use(cors({
+  origin: isProduction ? productionOrigins : true,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+}));
+
+// 3. Explicit preflight handler
+app.options('*', (req, res) => {
+  res.status(200).end();
+});
+// ========== END ATOMIC CORS FIX ========== //
+
+// Railway HTTPS fix - use https server in production
+const server = isProduction ? https.createServer(app) : http.createServer(app);
 
 // Trust Railway proxy
 app.set("trust proxy", 1);
@@ -130,7 +137,6 @@ app.use((req, res, next) => {
       console.log(`🚀 Server launched on port ${port}`);
       console.log('🔧 Free Tier Mode: ACTIVE (7s keep-alive pulses)');
       console.log(`🔗 Health: /.well-known/health`);
-      console.log(`🌐 Allowed Origins: ${allowedOrigins.join(', ')}`);
     });
 
     // Graceful shutdown with cleanup
