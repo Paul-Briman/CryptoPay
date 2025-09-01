@@ -1,8 +1,9 @@
 FROM node:18-alpine
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --only=production
 COPY . .
-RUN npm run build:server && npm run build:client
+RUN npm run build:server
+RUN npm run build:client
 EXPOSE 3000
-CMD ["npm", "run", "railway:start"]
+CMD ["node", "dist-server/index.js"]
