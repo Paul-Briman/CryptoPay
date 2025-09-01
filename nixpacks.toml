@@ -5,7 +5,7 @@ pkgs = ["nodejs_18", "npm"]
 cmds = ["npm ci"]
 
 [phases.build]
-cmds = ["npm run railway:build"]
+cmds = ["npm run build:server", "npm run build:client"]
 
 [phases.start]
 cmds = ["npm run railway:start"]
