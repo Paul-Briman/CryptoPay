@@ -9,7 +9,7 @@
     "dev:client": "cd client && vite",
     "build": "cd client && vite build --emptyOutDir",
     "build:client": "cd client && vite build --emptyOutDir",
-    "build:server": "cd server && tsx build src/index.ts --out-dir ../dist-server --format esm",
+    "build:server": "cd server && tsc --outDir ../dist-server",
     "start": "node dist-server/index.js",
     "check": "tsc --noEmit",
     "db:push": "drizzle-kit push",
