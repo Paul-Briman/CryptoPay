@@ -3,11 +3,15 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-# Debug: Check what files exist and run build with verbose output
-RUN ls -la && \
-    echo "=== Building server ===" && \
+
+# Debug: List files and check TypeScript compilation
+RUN echo "=== Listing files ===" && \
+    ls -la && \
+    echo "=== Listing server files ===" && \
+    ls -la server/ && \
+    echo "=== Attempting TypeScript build ===" && \
     cd server && \
-    npx tsc --outDir ../dist-server --verbose && \
+    npx tsc --outDir ../dist-server --listFiles && \
     echo "=== Checking dist-server ===" && \
     ls -la ../dist-server/
 
@@ -15,7 +19,6 @@ FROM node:20-alpine AS runtime
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
-# Copy from absolute path to avoid issues
 COPY --from=builder /app/dist-server ./dist-server
 COPY --from=builder /app/dist/client ./dist/client
 EXPOSE 3000
