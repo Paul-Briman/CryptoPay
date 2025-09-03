@@ -1,23 +1,15 @@
-FROM node:18-alpine
+FROM node:20-alpine AS builder
 WORKDIR /app
-
-# Copy package files first
 COPY package*.json ./
-
-# Install dependencies
 RUN npm ci
-
-# Copy source code
 COPY . .
+RUN npm run build:server && npm run build:client
 
-# Build server
-RUN cd server && npx tsc --outDir ../dist-server
-
-# Build client  
-RUN cd client && npm run build
-
-# Expose port
+FROM node:20-alpine AS runtime
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY --from=builder /app/dist-server ./dist-server
+COPY --from=builder /app/dist/client ./dist/client
 EXPOSE 3000
-
-# Start server
 CMD ["node", "dist-server/index.js"]

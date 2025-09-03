@@ -1,13 +1,7 @@
 ﻿services:
   - type: web
     name: cryptopay-backend
-    env: node
-    nodeVersion: 20.19.0
-    buildCommand: |
-      npm install
-      npx tsc --project tsconfig.json --outDir dist-server
-      cd client && npm run build
-    startCommand: node dist-server/index.js
+    dockerfilePath: Dockerfile
     envVars:
       - key: NODE_ENV
         value: production
