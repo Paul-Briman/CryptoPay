@@ -4,14 +4,11 @@
     "noEmit": false,
     "outDir": "../dist-server",
     "rootDir": "./",
-    "module": "CommonJS",
-    "target": "ES2020"
+    "module": "ESNext",          // Changed from CommonJS
+    "target": "ES2020",
+    "moduleResolution": "node",  // Added to fix bundler issue
+    "allowImportingTsExtensions": false  // Disabled for server
   },
-  "include": [
-    "**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist-server"
-  ]
+  "include": ["**/*"],
+  "exclude": ["node_modules", "dist-server"]
 }
