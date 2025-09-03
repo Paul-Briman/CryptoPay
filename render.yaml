@@ -2,8 +2,11 @@
   - type: web
     name: cryptopay-backend
     env: node
-    nodeVersion: 20  # ← Use latest Node.js 20
-    buildCommand: npm install && npm run build:server && npm run build:client
+    nodeVersion: 20.19.0
+    buildCommand: |
+      npm install
+      npx tsc --project tsconfig.json --outDir dist-server
+      cd client && npm run build
     startCommand: node dist-server/index.js
     envVars:
       - key: NODE_ENV
