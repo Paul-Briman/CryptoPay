@@ -2,6 +2,7 @@
   - type: web
     name: cryptopay-backend
     env: node
+    nodeVersion: 20  # ← Use latest Node.js 20
     buildCommand: npm install && npm run build:server && npm run build:client
     startCommand: node dist-server/index.js
     envVars:
