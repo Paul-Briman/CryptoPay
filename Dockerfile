@@ -4,16 +4,15 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 
-# Debug with timeout to prevent hanging
-RUN echo "=== Listing files ===" && \
-    ls -la && \
-    echo "=== Listing server files ===" && \
-    ls -la server/ && \
-    echo "=== Attempting TypeScript build ===" && \
+# Build server with specific config
+RUN echo "=== Building server ===" && \
     cd server && \
-    timeout 30s npx tsc --outDir ../dist-server --listFiles || echo "Build timed out or failed" && \
-    echo "=== Checking if dist-server exists ===" && \
-    ls -la ../ || true
+    npx tsc --project tsconfig.json --outDir ../dist-server
+
+# Build client
+RUN echo "=== Building client ===" && \
+    cd client && \
+    npm run build
 
 FROM node:20-alpine AS runtime
 WORKDIR /app
