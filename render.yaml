@@ -1,0 +1,17 @@
+﻿services:
+  - type: web
+    name: cryptopay-backend
+    env: node
+    buildCommand: npm install && npm run build:server && npm run build:client
+    startCommand: node dist-server/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        value: mysql://freedb_cryptopay_user:sUqkKVCfrs%2562nJ@sql.freedb.tech:3306/freedb_cryptopay
+      - key: SESSION_SECRET
+        value: 7tb5KrLsI9xQV1Ce0qMA8SENpFdyGD6g
+      - key: PRODUCTION_URL
+        value: https://crypto-pay-nu.vercel.app
