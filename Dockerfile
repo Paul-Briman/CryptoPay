@@ -6,8 +6,7 @@ COPY . .
 
 # Build server with specific config
 RUN echo "=== Building server ===" && \
-    cd server && \
-    npx tsc --project tsconfig.json --outDir ../dist-server
+    npx tsc --project server/tsconfig.json --outDir dist-server
 
 # Build client
 RUN echo "=== Building client ===" && \
