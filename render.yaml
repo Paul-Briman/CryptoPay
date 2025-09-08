@@ -1,7 +1,11 @@
 ﻿services:
+services:
   - type: web
     name: cryptopay-backend
-    dockerfilePath: Dockerfile
+    plan: free
+    env: node
+    buildCommand: npm run render-build
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -13,3 +17,11 @@
         value: 7tb5KrLsI9xQV1Ce0qMA8SENpFdyGD6g
       - key: PRODUCTION_URL
         value: https://crypto-pay-nu.vercel.app
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 465
+      - key: EMAIL_USER
+        value: thecryptopayteam@gmail.com
+      - key: EMAIL_PASS
+        value: jwujtoqgifhflxtu

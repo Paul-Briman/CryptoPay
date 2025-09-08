@@ -7,17 +7,17 @@
     "dev": "concurrently --kill-others-on-fail -n SERVER,CLIENT -c green,cyan \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "cross-env NODE_ENV=development tsx server/index.ts",
     "dev:client": "cd client && vite",
-    "build": "cd client && vite build --emptyOutDir",
+    "build": "npm run build:server",
     "build:client": "cd client && vite build --emptyOutDir",
     "build:server": "cd server && tsc --project tsconfig.json --outDir ../dist-server",
-    "start": "node dist-server/index.js",
+    "start": "NODE_ENV=production node dist-server/production-server.js",
     "check": "tsc --noEmit",
     "db:push": "drizzle-kit push",
     "deploy": "npm run build && gh-pages -d dist/client",
     "deploy:vercel": "cd client && npm install && vite build --emptyOutDir",
     "vercel-build": "cd client && vite build --emptyOutDir",
-    "railway:start": "NODE_ENV=production node dist-server/index.js",
-    "railway:build": "npm run build:client && npm run build:server"
+    "render-build": "npm install && npm run build:server",
+    "render-start": "NODE_ENV=production node dist-server/production-server.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
