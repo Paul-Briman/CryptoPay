@@ -1,11 +1,11 @@
-﻿services:
 services:
   - type: web
     name: cryptopay-backend
     plan: free
     env: node
-    buildCommand: npm run render-build
+    buildCommand: npm install && npm run build:server
     startCommand: npm start
+    nodeVersion: 20.19.0
     envVars:
       - key: NODE_ENV
         value: production
