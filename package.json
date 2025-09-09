@@ -10,7 +10,7 @@
     "build": "npm run build:server",
     "build:client": "cd client && vite build --emptyOutDir",
     "build:server": "cd server && tsc --project tsconfig.json --outDir ../dist-server",
-    "start": "NODE_ENV=production node dist-server/production-server.js",
+    "start": "NODE_ENV=production node dist-server/server/production-server.js",
     "check": "tsc --noEmit",
     "db:push": "drizzle-kit push",
     "deploy": "npm run build && gh-pages -d dist/client",
