@@ -3,7 +3,7 @@ import session from "express-session";
 import cors from "cors";
 import http from "http";
 import path from "path";
-import { registerRoutes } from "./routes";
+import { registerRoutes } from "./routes.js";
 import stoppable from "stoppable";
 import type { StoppableServer } from "stoppable";
 

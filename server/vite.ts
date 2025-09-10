@@ -5,7 +5,7 @@ import { fileURLToPath } from "url"; // <-- Added this import
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
-import viteConfig from "../client/vite.config";
+import viteConfig from "../client/vite.config.js";
 
 // Add these 2 lines at the top (only change needed)
 const __filename = fileURLToPath(import.meta.url);

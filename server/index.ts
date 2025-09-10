@@ -4,8 +4,8 @@ import cors from "cors";
 import http from "http";
 import https from "https";
 import path from "path";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { registerRoutes } from "./routes.js";
+import { setupVite, serveStatic, log } from "./vite.js";
 import stoppable from "stoppable";
 import type { StoppableServer } from "stoppable";
 

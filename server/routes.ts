@@ -4,7 +4,7 @@ dotenv.config();
 
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 import {
   serverInsertUserSchema,
   loginSchema,
@@ -15,7 +15,7 @@ import {
 import bcrypt from "bcrypt";
 import { z } from "zod";
 import nodemailer from "nodemailer";
-import { db } from "./db";
+import { db } from "./db.js";
 import { eq } from "drizzle-orm";
 
 // Extend express-session

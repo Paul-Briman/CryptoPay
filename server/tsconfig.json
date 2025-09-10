@@ -7,7 +7,6 @@
     "target": "ES2020",
     "moduleResolution": "node",
     "allowImportingTsExtensions": false
-    // REMOVE THIS LINE: "rootDir": "./"
   },
   "include": ["**/*"],
   "exclude": ["node_modules", "dist-server"]
