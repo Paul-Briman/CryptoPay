@@ -11,7 +11,7 @@ import {
   insertUserPlanSchema,
   type InsertUserPlan,
   userPlans,
-} from "@shared/schema";
+} from "../shared/schema.js";
 import bcrypt from "bcrypt";
 import { z } from "zod";
 import nodemailer from "nodemailer";

@@ -6,7 +6,7 @@ import {
   type ServerInsertUser,
   type UserPlan,
   type InsertUserPlan,
-} from "@shared/schema";
+} from "../shared/schema.js";
 import { db } from "./db.js";
 import { eq } from "drizzle-orm";
 

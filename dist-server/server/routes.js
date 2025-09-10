@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import { createServer } from "http";
 import { storage } from "./storage.js";
-import { serverInsertUserSchema, loginSchema, insertUserPlanSchema, userPlans, } from "@shared/schema";
+import { serverInsertUserSchema, loginSchema, insertUserPlanSchema, userPlans, } from "../shared/schema.js";
 import bcrypt from "bcrypt";
 import { z } from "zod";
 import nodemailer from "nodemailer";
