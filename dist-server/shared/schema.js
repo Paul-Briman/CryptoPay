@@ -1,10 +1,10 @@
-import { mysqlTable, varchar, int, boolean, timestamp, decimal, } from "drizzle-orm/mysql-core";
+import { pgTable, varchar, serial, boolean, timestamp, decimal, integer, } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-// === MySQL Tables ===
-export const users = mysqlTable("users", {
-    id: int("id").primaryKey().autoincrement(),
+// === PostgreSQL Tables ===
+export const users = pgTable("users", {
+    id: serial("id").primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
     email: varchar("email", { length: 255 }).notNull().unique(),
     password: varchar("password", { length: 255 }).notNull(),
@@ -14,13 +14,13 @@ export const users = mysqlTable("users", {
     phoneNumber: varchar("phone_number", { length: 20 }).notNull(),
     walletBalance: decimal('wallet_balance', { precision: 10, scale: 2 }).notNull().default('0.00'),
 });
-export const userPlans = mysqlTable("user_plans", {
-    id: int("id").primaryKey().autoincrement(),
-    userId: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+export const userPlans = pgTable("user_plans", {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     planType: varchar("plan_type", { length: 255 }).notNull(),
-    investmentAmount: int("investment_amount").notNull(),
-    expectedReturn: int("expected_return").notNull(),
-    roi: int("roi").notNull(),
+    investmentAmount: integer("investment_amount").notNull(),
+    expectedReturn: integer("expected_return").notNull(),
+    roi: integer("roi").notNull(),
     status: varchar("status", { length: 255 }).notNull().default("pending"),
     createdAt: timestamp("created_at").defaultNow(),
 });

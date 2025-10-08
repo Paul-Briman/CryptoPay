@@ -36,7 +36,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["tailwind.config.ts"], // Critical for CSS scanning
+    include: [], // Critical for CSS scanning
   },
   // Add this to your existing config
   css: {
