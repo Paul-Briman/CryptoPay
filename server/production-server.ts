@@ -62,6 +62,11 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date() });
 });
 
+// --- ADD THIS TEMPORARY TEST ROUTE ---
+app.get("/test-direct", (_req, res) => {
+    res.json({ message: "Direct route works!" });
+});
+
 // Register routes
 registerRoutes(app);
 
