@@ -24,6 +24,7 @@ app.use((req, res, next) => {
     "https://crypto-pay-git-main-briman-pauls-projects.vercel.app",
     "https://crypto-lppitu4fv-briman-pauls-projects.vercel.app",
     "https://cryptopay-production-2311.up.railway.app",
+     "https://breakable-hamster-cryptopay1-e5464d4c.koyeb.app",
     process.env.PRODUCTION_URL,
   ].filter(Boolean) as string[]; // Filter out undefined values
 
@@ -58,6 +59,7 @@ const productionOrigins = [
   "https://crypto-pay-git-main-briman-pauls-projects.vercel.app",
   "https://crypto-lppitu4fv-briman-pauls-projects.vercel.app",
   "https://cryptopay-production-2311.up.railway.app",
+  "https://breakable-hamster-cryptopay1-e5464d4c.koyeb.app",
   process.env.PRODUCTION_URL,
 ].filter(Boolean) as string[]; // Explicitly cast to string[]
 
