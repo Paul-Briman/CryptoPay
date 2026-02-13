@@ -60,6 +60,22 @@ app.get("/health", (_req, res) => {
 // Register routes
 registerRoutes(app);
 
+// DEBUG: Show all registered routes
+console.log('========== REGISTERED ROUTES ==========');
+if (app._router && app._router.stack) {
+  const routes = app._router.stack
+    .filter((layer: any) => layer.route)
+    .map((layer: any) => ({
+      path: layer.route.path,
+      methods: Object.keys(layer.route.methods)
+    }));
+  console.log('Routes found:', routes.length);
+  console.log(JSON.stringify(routes, null, 2));
+} else {
+  console.log('No routes registered or _router not available');
+}
+console.log('=======================================');
+
 // Error handler
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error("Server Error:", err);
