@@ -1,23 +1,16 @@
 {
   "compilerOptions": {
     "outDir": "../dist-server",
-    "module": "CommonJS",
+    "module": "NodeNext",
     "target": "ES2020",
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "allowImportingTsExtensions": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "noEmit": false,
     "strict": true,
-    "lib": ["ES2020"],
-    "types": ["node", "express", "express-session", "cors", "bcrypt", "nodemailer"]
+    "lib": ["ES2020"]
   },
-  "include": [
-    "**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "../client",
-    "../dist-server"
-  ]
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "../client", "../dist-server"]
 }
