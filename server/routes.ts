@@ -18,6 +18,8 @@ import nodemailer from "nodemailer";
 import { db } from "./db.js";
 import { eq } from "drizzle-orm";
 
+console.log("✅✅✅ ROUTES.TS IS LOADED! ✅✅✅");
+
 // Extend express-session
 declare module "express-session" {
   interface SessionData {
@@ -51,7 +53,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  console.log("🚀🚀🚀 registerRoutes() RAN! 🚀🚀🚀");
   // ========== RAILWAY CRITICAL FIXES START ========== //
   // 🚨 HEALTH CHECKS AT THE VERY TOP (BEFORE ANY MIDDLEWARE)
   app.get("/", (_req, res) => {
