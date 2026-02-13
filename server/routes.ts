@@ -79,23 +79,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   // ========== RAILWAY CRITICAL FIXES END ========== //
 
-  // CORS Configuration
-  const allowedOrigins = [
-    "http://localhost:5173",
-    "https://crypto-pay-nu.vercel.app",
-    "https://crypto-pay-git-main-briman-pauls-projects.vercel.app",
-    "https://crypto-lppitu4fv-briman-pauls-projects.vercel.app",
-    process.env.PRODUCTION_URL,
-  ].filter(Boolean) as string[];
-
-  const corsOptions = {
-    origin: allowedOrigins,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  };
-  app.use(cors(corsOptions));
-  app.options("*", cors(corsOptions));
-
   // Auth middleware
   const requireAuth = (req: Request, res: Response, next: NextFunction) => {
     if (!req.session?.userId) {
