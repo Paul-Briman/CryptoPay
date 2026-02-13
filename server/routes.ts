@@ -422,6 +422,5 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: "User deleted" });
   });
 
-  const httpServer = createServer(app);
-  return httpServer;
+  return createServer(app);
 }
