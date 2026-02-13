@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useAuth } from "../lib/auth";
-import { useBitcoinPrice } from "../lib/bitcoin";
+//import { useBitcoinPrice } from "../lib/bitcoin";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -26,7 +26,7 @@ interface HomeProps {
 
 export function Home({ onLoginClick, onSignupClick }: HomeProps) {
   const { data: user } = useAuth();
-  const { data: bitcoinPrice } = useBitcoinPrice();
+  //const { data: bitcoinPrice } = useBitcoinPrice();
   const [livePayouts, setLivePayouts] = useState<any[]>([]);
 
   const plans = [
@@ -140,7 +140,7 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
           </p>
 
           {/* Live Bitcoin Price */}
-          <Card className="crypto-bg-gray border-gray-600 mb-8 max-w-md mx-auto shadow-xl">
+         {/* <Card className="crypto-bg-gray border-gray-600 mb-8 max-w-md mx-auto shadow-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-center mb-2">
                 <Bitcoin className="crypto-text-gold h-8 w-8 mr-2" />
@@ -167,7 +167,7 @@ export function Home({ onLoginClick, onSignupClick }: HomeProps) {
                 (24h)
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
