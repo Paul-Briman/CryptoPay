@@ -73,7 +73,7 @@ app.get("/test-direct", (_req, res) => {
 });
 
 // Register routes
-registerRoutes(app);
+await registerRoutes(app);
 
 
 // Error handler
