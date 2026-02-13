@@ -47,7 +47,9 @@ app.use(session({
 app.get("/health", (_req, res) => {
     res.json({ status: "ok", timestamp: new Date() });
 });
+
 // Register routes
+registerRoutes(app);
 registerRoutes(app);
 // Error handler
 app.use((err, _req, res, _next) => {
