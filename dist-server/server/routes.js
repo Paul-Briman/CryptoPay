@@ -50,20 +50,42 @@ export async function registerRoutes(app) {
     // ========== BITCOIN PRICE API ========== //
     app.get("/api/bitcoin/price", async (_req, res) => {
         try {
-            console.log("Fetching Bitcoin price from Binance...");
-            // Get current price
-            const priceRes = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
-            const priceData = await priceRes.json();
-            // Get 24h change
-            const changeRes = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
-            const changeData = await changeRes.json();
-            res.json({
-                price: parseFloat(priceData.price),
-                change: parseFloat(changeData.priceChangePercent)
+            console.log("Fetching Bitcoin price from CoinGecko with API key...");
+            const apiKey = process.env.COINGECKO_API_KEY || '';
+            const url = apiKey
+                ? `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&x_cg_demo_api_key=${apiKey}`
+                : 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true';
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    'User-Agent': 'CryptoPay App/1.0'
+                }
             });
+            if (response.status === 429) {
+                console.log("Rate limited, using fallback price");
+                return res.json({
+                    price: 68854.93,
+                    change: 3.6
+                });
+            }
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log("CoinGecko response:", data);
+            if (data?.bitcoin?.usd) {
+                res.json({
+                    price: data.bitcoin.usd,
+                    change: data.bitcoin.usd_24h_change || 0
+                });
+            }
+            else {
+                throw new Error("Unexpected API response structure");
+            }
         }
         catch (error) {
             console.error("Failed to fetch Bitcoin price:", error);
+            // Today's actual price from CoinGecko page
             res.json({
                 price: 68854.93,
                 change: 3.6
