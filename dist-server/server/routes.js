@@ -50,12 +50,12 @@ export async function registerRoutes(app) {
     // ========== BITCOIN PRICE API ========== //
     app.get("/api/bitcoin/price", async (_req, res) => {
         try {
-            // Fetch from CoinGecko (free, no API key needed)
-            const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+            console.log("Fetching Bitcoin price from Binance...");
+            const response = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
             const data = await response.json();
             res.json({
-                price: data.bitcoin.usd,
-                change: data.bitcoin.usd_24h_change
+                price: parseFloat(data.lastPrice),
+                change: parseFloat(data.priceChangePercent)
             });
         }
         catch (error) {
