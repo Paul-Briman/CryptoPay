@@ -86,42 +86,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ========== BITCOIN PRICE API ========== //
 app.get("/api/bitcoin/price", async (_req, res) => {
   try {
-    console.log("Fetching Bitcoin price from CoinGecko...");
+    console.log("Fetching Bitcoin price from Binance...");
     
-    // Using the exact API structure from the page you found
-    const response = await fetch(
-      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true',
-      {
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'CryptoPay App/1.0'
-        }
-      }
-    );
+    // Get current price
+    const priceRes = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+    const priceData = await priceRes.json();
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    // Get 24h change
+    const changeRes = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
+    const changeData = await changeRes.json();
     
-    const data = await response.json();
-    console.log("CoinGecko response:", data);
-    
-    // Based on the page you saw, the structure should be: { bitcoin: { usd: 68854.93, usd_24h_change: 3.6 } }
-    if (data?.bitcoin?.usd) {
-      res.json({
-        price: data.bitcoin.usd,
-        change: data.bitcoin.usd_24h_change || 0
-      });
-    } else {
-      throw new Error("Unexpected API response structure");
-    }
+    res.json({
+      price: parseFloat(priceData.price),
+      change: parseFloat(changeData.priceChangePercent)
+    });
     
   } catch (error) {
     console.error("Failed to fetch Bitcoin price:", error);
-    // Return the REAL current price from the page as fallback
     res.json({
-      price: 68854.93,  // Updated to today's actual price
-      change: 3.6        // Updated to today's actual change
+      price: 68854.93,
+      change: 3.6
     });
   }
 });
