@@ -82,6 +82,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok", time: new Date() });
   });
+
+  // ========== BITCOIN PRICE API ========== //
+app.get("/api/bitcoin/price", async (_req, res) => {
+  try {
+    // Fetch from CoinGecko (free, no API key needed)
+    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+    const data = await response.json();
+    
+    res.json({
+      price: data.bitcoin.usd,
+      change: data.bitcoin.usd_24h_change
+    });
+  } catch (error) {
+    console.error("Failed to fetch Bitcoin price:", error);
+    // Return fallback data if API fails
+    res.json({
+      price: 117672.00,
+      change: 0.96
+    });
+  }
+});
   // ========== RAILWAY CRITICAL FIXES END ========== //
 
   // Auth middleware
