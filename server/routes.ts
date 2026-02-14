@@ -86,17 +86,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ========== BITCOIN PRICE API ========== //
 app.get("/api/bitcoin/price", async (_req, res) => {
   try {
-    console.log("Fetching Bitcoin price from Binance...");
-    const response = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
+    console.log("Fetching Bitcoin price from CoinGecko...");
+    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
     const data = await response.json();
     
     res.json({
-      price: parseFloat(data.lastPrice),
-      change: parseFloat(data.priceChangePercent)
+      price: data.bitcoin.usd,
+      change: data.bitcoin.usd_24h_change
     });
   } catch (error) {
     console.error("Failed to fetch Bitcoin price:", error);
-    // Return fallback data if API fails
     res.json({
       price: 117672.00,
       change: 0.96
