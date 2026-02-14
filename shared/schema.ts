@@ -71,13 +71,13 @@ export const insertUserSchema = baseUserSchema.extend({
 export const serverInsertUserSchema = baseUserSchema;
 
 // Plans
-export const insertUserPlanSchema = createInsertSchema(userPlans).pick({
-  userId: true, // ✅ add this
-  planType: true,
-  investmentAmount: true,
-  expectedReturn: true,
-  roi: true,
-  status: true,
+export const insertUserPlanSchema = z.object({
+  userId: z.number(),
+  planType: z.string(),
+  investmentAmount: z.number(),
+  expectedReturn: z.number(),
+  roi: z.number(),
+  status: z.string().default('pending')
 });
 
 // Login
