@@ -17,6 +17,7 @@ import { z } from "zod";
 import nodemailer from "nodemailer";
 import { db } from "./db.js";
 import { eq } from "drizzle-orm";
+import session from "express-session";
 
 console.log("✅✅✅ ROUTES.TS IS LOADED! ✅✅✅");
 

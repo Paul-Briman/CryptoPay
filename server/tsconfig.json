@@ -13,5 +13,5 @@
     "resolveJsonModule": true
   },
   "include": ["**/*.ts"],
-  "exclude": ["node_modules", "../client", "../dist-server"]
+  "exclude": ["node_modules", "../client", "../dist-server",  "../client/vite.config.ts"]
 }
