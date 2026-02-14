@@ -15,6 +15,10 @@ const allowedOrigins = [
     "https://crypto-lppitu4fv-briman-pauls-projects.vercel.app",
     process.env.FRONTEND_URL,
 ].filter(Boolean);
+// Health check endpoint - MUST be first
+app.get('/health', (_req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
 app.use(cors({
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps, curl requests)
@@ -28,6 +32,9 @@ app.use(cors({
     },
     credentials: true
 }));
+// Handle preflight requests
+app.options('*', cors());
+console.log('🔥 CORS allowed origins:', allowedOrigins);
 app.set("trust proxy", 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -47,10 +54,12 @@ app.use(session({
 app.get("/health", (_req, res) => {
     res.json({ status: "ok", timestamp: new Date() });
 });
-
+// --- ADD THIS TEMPORARY TEST ROUTE ---
+app.get("/test-direct", (_req, res) => {
+    res.json({ message: "Direct route works!" });
+});
 // Register routes
-registerRoutes(app);
-registerRoutes(app);
+await registerRoutes(app);
 // Error handler
 app.use((err, _req, res, _next) => {
     console.error("Server Error:", err);

@@ -45,9 +45,19 @@ export class DatabaseStorage {
         return this.addRole(user);
     }
     async createUser(user) {
-        await db.insert(users).values(user);
-        const [newUser] = await db.select().from(users).where(eq(users.email, user.email));
-        return this.addRole(newUser);
+        // Ensure all required fields are present
+        const newUser = {
+            name: user.name,
+            email: user.email,
+            password: user.password,
+            phonePrefix: user.phonePrefix || '',
+            phoneNumber: user.phoneNumber || '',
+            isAdmin: false,
+            walletBalance: "0"
+        };
+        await db.insert(users).values(newUser);
+        const [createdUser] = await db.select().from(users).where(eq(users.email, user.email));
+        return this.addRole(createdUser);
     }
     async getAllUsers() {
         return await db.select().from(users);
@@ -69,12 +79,17 @@ export class DatabaseStorage {
         return await db.select().from(userPlans).where(eq(userPlans.userId, userId));
     }
     async createUserPlan(userPlan) {
-        await db.insert(userPlans).values(userPlan);
-        const [plan] = await db
-            .select()
-            .from(userPlans)
-            .where(eq(userPlans.userId, userPlan.userId));
-        return plan;
+        // Explicitly create the object with all required fields
+        const planData = {
+            userId: userPlan.userId,
+            planType: userPlan.planType,
+            investmentAmount: userPlan.investmentAmount,
+            expectedReturn: userPlan.expectedReturn,
+            roi: userPlan.roi,
+            status: userPlan.status || 'pending'
+        };
+        const [createdPlan] = await db.insert(userPlans).values(planData).returning();
+        return createdPlan;
     }
     async updateUserPlanStatus(id, status) {
         await db.update(userPlans).set({ status }).where(eq(userPlans.id, id));

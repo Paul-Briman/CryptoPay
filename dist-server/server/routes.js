@@ -1,4 +1,3 @@
-import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 import { createServer } from "http";
@@ -9,6 +8,7 @@ import { z } from "zod";
 import nodemailer from "nodemailer";
 import { db } from "./db.js";
 import { eq } from "drizzle-orm";
+console.log("✅✅✅ ROUTES.TS IS LOADED! ✅✅✅");
 const otpStore = new Map();
 function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -23,6 +23,7 @@ const transporter = nodemailer.createTransport({
     },
 });
 export async function registerRoutes(app) {
+    console.log("🚀🚀🚀 registerRoutes() RAN! 🚀🚀🚀");
     // ========== RAILWAY CRITICAL FIXES START ========== //
     // 🚨 HEALTH CHECKS AT THE VERY TOP (BEFORE ANY MIDDLEWARE)
     app.get("/", (_req, res) => {
@@ -47,21 +48,6 @@ export async function registerRoutes(app) {
         res.json({ status: "ok", time: new Date() });
     });
     // ========== RAILWAY CRITICAL FIXES END ========== //
-    // CORS Configuration
-    const allowedOrigins = [
-        "http://localhost:5173",
-        "https://crypto-pay-nu.vercel.app",
-        "https://crypto-pay-git-main-briman-pauls-projects.vercel.app",
-        "https://crypto-lppitu4fv-briman-pauls-projects.vercel.app",
-        process.env.PRODUCTION_URL,
-    ].filter(Boolean);
-    const corsOptions = {
-        origin: allowedOrigins,
-        credentials: true,
-        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    };
-    app.use(cors(corsOptions));
-    app.options("*", cors(corsOptions));
     // Auth middleware
     const requireAuth = (req, res, next) => {
         if (!req.session?.userId) {
@@ -354,6 +340,5 @@ export async function registerRoutes(app) {
         }
         res.json({ message: "User deleted" });
     });
-    const httpServer = createServer(app);
-    return httpServer;
+    return createServer(app);
 }

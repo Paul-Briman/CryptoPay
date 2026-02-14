@@ -1,6 +1,5 @@
 import { pgTable, varchar, serial, boolean, timestamp, decimal, integer, } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 // === PostgreSQL Tables ===
 export const users = pgTable("users", {
@@ -52,13 +51,13 @@ export const insertUserSchema = baseUserSchema.extend({
 // ✅ For backend: no confirmPassword
 export const serverInsertUserSchema = baseUserSchema;
 // Plans
-export const insertUserPlanSchema = createInsertSchema(userPlans).pick({
-    userId: true, // ✅ add this
-    planType: true,
-    investmentAmount: true,
-    expectedReturn: true,
-    roi: true,
-    status: true,
+export const insertUserPlanSchema = z.object({
+    userId: z.number(),
+    planType: z.string(),
+    investmentAmount: z.number(),
+    expectedReturn: z.number(),
+    roi: z.number(),
+    status: z.string().default('pending')
 });
 // Login
 export const loginSchema = z.object({
